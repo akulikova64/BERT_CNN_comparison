@@ -121,27 +121,24 @@ ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert.png"), plot = plo
 #==========================================================================================================
 
 get_neff <- function(freq_list) {
-  sum = 0
+  sum <- 0
   for (freq in freq_list)
   {
-    freq = as.numeric(freq)
-    sum = sum + freq * ifelse(freq == 0, 1, log(freq))
+    freq <- as.numeric(freq)
+    sum <- sum + freq * ifelse(freq == 0, 1, log(freq))
   }
     
-  entropy = -sum
-  neff = exp(entropy)
-  return(neff)
+  entropy <- -sum
+  neff <- exp(entropy)
+  return(as.numeric(neff))
 }
 
 # lets find n-eff for the transformer data:
-
-
 trans_data2 <- trans_data %>%
   select(c(gene, position, A:Y)) %>%
-  mutate(n_eff = map(trans_data[A:Y], get_neff))
-
-
-
+  nest(data = c(A:Y)) %>%
+  mutate(n_eff_tranf = map(data, get_neff)) %>%
+  select(-data)
 
 
 # preparing alignment data:
@@ -149,14 +146,84 @@ align_data2 <- align_data %>%
   select(c(position, gene, n_eff)) %>%
   rename(n_eff_align = n_eff)
 
+# preparing cnn data:
+cnn_data_new <- read.csv(file = "./output/stats_cnn.csv", header=TRUE, sep=",")
+
+cnn_data2 <- cnn_data_new %>%
+  select(c(gene, position, n_eff)) %>%
+  rename(n_eff_cnn = n_eff)
+
+joined_for_cor <- inner_join(trans_data2, cnn_data2)
+joined_for_cor2 <- inner_join( joined_for_cor, align_data2)
+
+joined_for_cor2$n_eff_align <- as.numeric(joined_for_cor2$n_eff_align)
+joined_for_cor2$n_eff_tranf <- as.numeric(joined_for_cor2$n_eff_tranf)
+joined_for_cor2$n_eff_cnn <- as.numeric(joined_for_cor2$n_eff_cnn)
+
+cor_transf <- joined_for_cor2 %>%
+  group_by(gene) %>%
+  summarise(cor = cor(n_eff_tranf, n_eff_align)) %>%
+  mutate(group = "Transformer")
+
+cor_cnn <- joined_for_cor2 %>%
+  group_by(gene) %>%
+  summarise(cor = cor(n_eff_cnn, n_eff_align)) %>%
+  mutate(group = "CNN")
+
+data_cor <- rbind(cor_transf, cor_cnn)
+
+data_cor <- data_cor %>%
+  group_by(gene) %>%
+  mutate(
+    # pick y value corresponding to y3
+    color_y = sum(cor * (group == "CNN")),
+    dx = rnorm(n(), mean = 0, sd = .05),
+    dy = rnorm(n(), mean = 0, sd = .05),
+    x_value = as.numeric(factor(group)))  
 
 
+plot_cor <- data_cor %>%
+  ggplot(aes(x = group, y = cor)) +
+  geom_path(
+    aes(x = as.numeric(factor(group))+dx, y = cor+dy, group = gene, color = color_y),
+    size = 0.25) +
+  geom_point(
+    aes(x = as.numeric(factor(group))+dx, y = cor+dy, group = gene, fill = color_y),
+    shape = 21, 
+    color = "black",
+    size = 2) +
+  scale_x_continuous(
+    #name = "Neural Network",
+    name = "",
+    limits = c(0.7,2.3),
+    labels = c("CNN \n (structure)", "Transformer \n (sequence)"),
+    breaks = (seq(from = 1.0, to = 2.0, by = 1))
+  ) +
+  scale_y_continuous(
+    name = "Correlation Coefficients",
+    limits = c(-0.1, 0.87),
+    breaks = seq(from = 0.0, to = 0.8, by = 0.1),
+    expand = c(0, 0)) +
+  scale_color_gradient(
+    aesthetics = c("color", "fill"), 
+    high = "#ffd966", 
+    low = "#080845") +
+  theme_bw(16) +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(color = "black", size = 16),
+    panel.grid.minor = element_blank())
+
+plot_cor
+
+ggsave(filename = paste0("./analysis/figures/neff_cor_cnn_bert.png"), plot = plot_cor, width = 6, height = 6)
 
 
-
-
-
-
-
-
+#lets get mean correlations:
+means_cor <- data_cor %>%
+  select(c(gene, cor, group)) %>%
+  group_by(group) %>%
+  summarise(mean = mean(cor))
+#CNN mean cor: 0.325
+#transformer mean cor: 0.404
 
