@@ -3,6 +3,71 @@ library(cowplot)
 library(data.table)
 options(scipen = 999)
 
+get_aa_name <- function(x) {
+  
+  if (x == 'ALA') {
+    return('A')
+  }
+  else if (x == 'ARG') {
+    return('R')
+  }
+  else if (x == 'ASN') {
+    return('N')
+  }
+  else if (x == 'ASP') {
+    return("D")
+  }
+  else if (x == "CYS") {
+    return("C")
+  }
+  else if (x == 'GLN') {
+    return('Q')
+  }
+  else if (x == 'GLU') {
+    return('E')
+  }
+  else if (x == 'GLY') {
+    return('G')
+  }
+  else if (x == 'HIS') {
+    return('H')
+  }
+  else if (x == 'ILE') {
+    return('I')
+  }
+  else if (x == 'LEU') {
+    return('L')
+  }
+  else if (x == 'LYS') {
+    return('K')
+  }
+  else if (x == 'MET') {
+    return('M')
+  }
+  else if (x == 'PHE') {
+    return('F')
+  }
+  else if (x == 'PRO') {
+    return('P')
+  }
+  else if (x == 'SER') {
+    return('S')
+  }
+  else if (x == 'THR') {
+    return('T')
+  }
+  else if (x == 'TRP') {
+    return('W')
+  }
+  else if (x == 'TYR') {
+    return('Y')
+  }
+  else if (x == 'VAL') {
+    return('V')
+  }
+  NA_character_
+}
+
 
 data <- read.csv(file = "./output/cnn_wt_max_freq_3ogo.csv", header=TRUE, sep=",")
 
@@ -49,6 +114,9 @@ cnn_data3 <- data_processed2 %>%
   select(c(position, aa_wt, freq_wt, K, R)) %>%
   mutate(group = "cnn")
 
+cnn_data3 <- cnn_data3 %>%
+  mutate(aa_wt = map_chr(aa_wt, get_aa_name))
+
 data_bert2 <- data_bert %>%
   select(c(wtIndex, wtScore, wt, A:Y)) %>%
   rename(freq_wt = wtScore,
@@ -60,12 +128,135 @@ data_bert3 <- data_bert2 %>%
   mutate(group = "transformer")
   
   
-  
-
 for_KR_plots <- rbind(data_bert3, cnn_data3)
+for_KR_plots2 <- for_KR_plots %>% 
+  #mutate(aa_wt = fct_relevel(aa_wt, "M","Q","V","Q","L","V","E","S","G","G","A","L","V","Q","P","G","G","S","L","R","L","S","C","A","A","S","G","F","P","V","N","R","Y","S","M","R","W","Y","R","Q","A","P","G","K","E","R","E","W","V","A","G","M","S","S","A","G","D","R","S","S","Y","E","D","S","V","K","G","R","F","T","I","S","R","D","D","A","R","N","T","V","Y","L","Q","M","N","S","L","K","P","E","D","T","A","V","Y","Y","C","N","V","N","V","G","F","E","Y","W","G","Q","G","T","Q","V","T","V","S","S"))
+  mutate(wt_K = aa_wt == 'K',
+         wt_R = aa_wt == 'R')
 
+labels <- c("M","Q","V","Q","L","V","E","S","G","G","A","L","V","Q","P","G","G","S","L","R","L","S","C","A","A","S","G","F","P","V","N","R","Y","S","M","R","W","Y","R","Q","A","P","G","K","E","R","E","W","V","A","G","M","S","S","A","G","D","R","S","S","Y","E","D","S","V","K","G","R","F","T","I","S","R","D","D","A","R","N","T","V","Y","L","Q","M","N","S","L","K","P","E","D","T","A","V","Y","Y","C","N","V","N","V","G","F","E","Y","W","G","Q","G","T","Q","V","T","V","S","S")
 
+plot_K <- for_KR_plots2 %>%
+  ggplot(aes(x = position, y = K, color = group)) +
+  geom_line() +
+  geom_point(aes(fill = wt_K),
+             shape = 21, 
+             size = 2) +
+  scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_fill_manual(values = c("black", "red")) +
+  scale_x_continuous(
+    name = "Position (wt amino acid)",
+    labels = labels,
+    breaks = seq(from = 1, to = 116, by = 1),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "Probability of Lysine (K)",
+    limits = c(0, 1.0),
+    breaks = seq(from = 0.0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(color = "model", fill = "Is K the wt?") +
+  theme_cowplot(9) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 9),
+    panel.grid.minor = element_blank())
+
+plot_K
+
+ggsave(filename = "./analysis/figures/3ogo_lysine.png", plot = plot_K, width = 12, height = 4)
+
+# now lets make a plot for Arginine:
+
+plot_R <- for_KR_plots2 %>%
+  ggplot(aes(x = position, y = R, color = group)) +
+  geom_line() +
+  geom_point(aes(fill = wt_R),
+             shape = 21, 
+             size = 2) +
+  scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_fill_manual(values = c("black", "red")) +
+  scale_x_continuous(
+    name = "Position (wt amino acid)",
+    labels = labels,
+    breaks = seq(from = 1, to = 116, by = 1),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "Probability of Arginine (R)",
+    limits = c(0, 1.0),
+    breaks = seq(from = 0.0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(color = "model", fill = "Is R the wt?") +
+  theme_cowplot(9) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 9),
+    panel.grid.minor = element_blank())
+
+plot_R
+
+ggsave(filename = "./analysis/figures/3ogo_arginine.png", plot = plot_R, width = 12, height = 4)
+
+#=====================================================================================
+#now lets look at n-effective for both models  
+#=====================================================================================
+
+get_neff <- function(freq_list) {
+  sum <- 0
+  for (freq in freq_list)
+  {
+    freq <- as.numeric(freq)
+    sum <- sum + freq * ifelse(freq == 0, 1, log(freq))
+  }
   
+  entropy <- -sum
+  neff <- exp(entropy)
+  return(as.numeric(neff))
+}
 
+data_bert_n <- data_bert2 %>%
+  select(c(position, aa_wt, A:Y)) %>%
+  nest(data = c(A:Y)) %>%
+  mutate(n_eff = map_chr(data, get_neff)) %>%
+  select(-data) %>%
+  mutate(group = "transformer")
+
+data_cnn_n <- data_processed2 %>%
+  mutate(aa_wt = map_chr(aa_wt, get_aa_name)) %>%
+  nest(data = c(A:V)) %>%
+  mutate(n_eff = map_chr(data, get_neff)) %>%
+  select(-c(data, freq_wt)) %>%
+  mutate(group = "cnn")
+
+for_n_plot <- rbind(data_bert_n, data_cnn_n)
+
+labels <- c("M","Q","V","Q","L","V","E","S","G","G","A","L","V","Q","P","G","G","S","L","R","L","S","C","A","A","S","G","F","P","V","N","R","Y","S","M","R","W","Y","R","Q","A","P","G","K","E","R","E","W","V","A","G","M","S","S","A","G","D","R","S","S","Y","E","D","S","V","K","G","R","F","T","I","S","R","D","D","A","R","N","T","V","Y","L","Q","M","N","S","L","K","P","E","D","T","A","V","Y","Y","C","N","V","N","V","G","F","E","Y","W","G","Q","G","T","Q","V","T","V","S","S")
+
+for_n_plot$n_eff <- as.numeric(for_n_plot$n_eff)
+
+plot_n <- for_n_plot %>%
+  ggplot(aes(x = position, y = n_eff, color = group)) +
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_x_continuous(
+    name = "Position (wt amino acid)",
+    labels = labels,
+    breaks = seq(from = 1, to = 116, by = 1),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "N-effective",
+    limits = c(1, 16),
+    breaks = seq(from = 2, to = 16, by = 2),
+    expand = c(0, 0)) +
+  labs(color = "model") +
+  theme_cowplot(9) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 9),
+    panel.grid.minor = element_blank())
+
+plot_n
+
+ggsave(filename = "./analysis/figures/3ogo_n_eff.png", plot = plot_n, width = 12, height = 4)
 
 
