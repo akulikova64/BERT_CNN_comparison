@@ -8,10 +8,16 @@ options(scipen = 999)
 data <- read.csv(file = "./output/cnn_wt_max_freq_3ogo.csv", header=TRUE, sep=",")
 
 data2 <- data %>%
-  filter(chain == 'B') %>%
+  filter(chain == 'G') %>%
   pivot_wider(names_from = group, values_from = c(aa, freq))
 
+seq = data2$aa_wt
+paste(seq, collapse = "")
+
+
 write.csv(data2, "./output/cnn_3ogo.csv")
+
+data_bert <- read.csv(file = "./output/bert_prediction_3ogo.csv", header=TRUE, sep=",")
 
 
 #ploting data2 from above:

@@ -5,9 +5,7 @@ from Bio import SeqIO
 import pandas as pd
 from berteome import berteome
 
-
 # this script takes in a fasta file of sequences and runds every sequence through the BERT transformer model. 
-
 
 input_path = "../../data/PSICOV_seqs.fasta"
 output_path = "../../output/PSICOV_BERT_predictions.csv"

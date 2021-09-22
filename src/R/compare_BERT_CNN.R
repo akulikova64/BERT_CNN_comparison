@@ -1,6 +1,7 @@
 library(tidyverse)
 library(cowplot)
 library(data.table)
+library(ggforce)
 options(scipen = 999)
 
 # this script compares BERT to CNN for accuracy in predictions
@@ -19,6 +20,12 @@ cnn_data <- cnn_data_all %>%
          aa_wt_cnn = aa_wt,
          freq_pred_cnn = freq_predicted,
          freq_wt_cnn = freq_wt)
+
+# total_aa <- cnn_data %>%
+#   group_by(aa_wt_cnn) %>%
+#   count()
+# 
+# write.csv(total_aa, "./output/aa_counts_PSICOV.csv")
 
 #clean trans data:
 
@@ -71,6 +78,7 @@ means <- stats_1 %>%
   group_by(group) %>%
   summarise(mean = mean(freq_predict_wt))
 #cnn: 75.8% Accuracy
+#transformer: 71.6% accuracy
 
 stats_1 <- stats_1 %>%
   group_by(gene) %>%
@@ -116,6 +124,93 @@ plot
 
 ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert.png"), plot = plot, width = 6, height = 6)
  
+#========================================================================
+#lets look at CNN confidence vs. Accuracy for both models:
+get_pred_bin <- function(x) {
+  
+  if (x > 0 & x <= 0.2) {
+    return("(0-0.2]")
+  }
+  else if (x > 0.2 & x <= 0.4) {
+    return("(0.2-0.4]")
+  }
+  else if (x > 0.4 & x <= 0.6) {
+    return("(0.4-0.6]")
+  }
+  else if (x > 0.6 & x <= 0.8) {
+    return("(0.6-0.8]")
+  }
+  else if (x > 0.8 & x <= 1.0) {
+    return("(0.8-1.0]")
+  }
+  NA_character_
+}
+
+
+joined2$freq_pred <- as.numeric(joined2$freq_pred)
+
+joined_conf <- joined2 %>%
+  mutate(pred_bin = map_chr(freq_pred, get_pred_bin))
+
+ 
+  
+match_wt <- joined_conf %>%
+  mutate(match_predict_wt = aa_pred == aa_wt)
+
+#data entries where the predicted amino acid matches the wt
+stats_1 <- match_wt %>%
+  group_by(gene, group, pred_bin) %>%
+  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt))) %>%
+  na.omit()
+
+stat_data_1 <- stats_1 %>%
+  select(-gene) %>%
+  group_by(pred_bin, group) %>%
+  summarise(estimate = mean(freq_predict_wt),
+            std_error = sd(freq_predict_wt)/sqrt(length(freq_predict_wt))) %>%
+  na.omit()
+
+# fill = "#8c7b9d", color = "#655775"
+
+
+
+plot_conf <- stats_1 %>%
+  ggplot(aes(y = freq_predict_wt, x = pred_bin, fill = group)) +
+  geom_violin(alpha = 0.7, size = 0.5, bw = 0.03, position = position_dodge(width = 0.8)) + 
+  geom_pointrange(data = stat_data_1, aes(x = pred_bin,
+                                          y = estimate,
+                                          ymin = estimate - 1.96*std_error,
+                                          ymax = estimate + 1.96*std_error),
+                  color = "black", 
+                  alpha = 0.6, 
+                  size = 0.3, 
+                  position = position_dodge(width = 0.8)) +
+  geom_sina(aes(color = group), 
+            size = 0.5,
+            position = position_dodge(width = 0.8),
+            show.legend = F) +
+  #stat_summary(fun.data=data_summary, color = "black", alpha = 0.7) +
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position = "right") +
+  scale_y_continuous(
+    name = "Accuracy",
+    limits = c(0.0, 1.0),
+    breaks = seq(from = 0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(fill = "model") +
+  scale_x_discrete(
+    name = "CNN confidence") +
+  scale_fill_manual(values = c("#32a852", "#9d46b8")) +
+  scale_color_manual(values = c("#154221", "#3e184a"))
+
+plot_conf
+
+ggsave(filename = paste0("./analysis/figures/cnn_bert_conf_acc.png"), plot = plot_conf, width = 11, height = 5)
+
+
 #==========================================================================================================
 # now lets look at n-eff correlations. CNN vs. Transformer.
 #==========================================================================================================

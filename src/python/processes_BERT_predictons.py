@@ -1,1 +1,2 @@
-# this program processes BERT sequence predictons. 
+# this program processes BERT sequence predictons. (under construction)
+
