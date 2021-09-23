@@ -122,7 +122,7 @@ plot <- stats_1 %>%
 
 plot
 
-ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert.png"), plot = plot, width = 6, height = 6)
+#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert.png"), plot = plot, width = 6, height = 6)
  
 #========================================================================
 #lets look at CNN confidence vs. Accuracy for both models:
@@ -202,7 +202,7 @@ plot_conf <- stats_1 %>%
     expand = c(0, 0)) +
   labs(fill = "model") +
   scale_x_discrete(
-    name = "CNN confidence") +
+    name = "Confidence (predicted probability)") +
   scale_fill_manual(values = c("#32a852", "#9d46b8")) +
   scale_color_manual(values = c("#154221", "#3e184a"))
 
@@ -210,6 +210,32 @@ plot_conf
 
 ggsave(filename = paste0("./analysis/figures/cnn_bert_conf_acc.png"), plot = plot_conf, width = 11, height = 5)
 
+#==========================================================================================================
+# now lets look at the RSA vs transformer confidence
+#==========================================================================================================
+
+#loading in RSA data:
+sa_data <- read.csv(file = "./output/SASA_scores.csv", header=TRUE, sep=",")
+
+sa_data2 <- sa_data %>%
+  select(c(gene, position, SASA_rel_total))
+  
+
+trans_data <- read.csv(file = "./output/PSICOV_BERT_predictions.csv", header=TRUE, sep=",")
+
+transf_data <- trans_data %>%
+  mutate(pred_prob = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
+  pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
+  mutate(aa_pred = ifelse(pred_prob == freq, aa, NA)) %>%
+  na.omit() %>%
+  select(-c(aa, freq, row)) %>%
+  rename(freq_pred_transf = pred_prob,
+         freq_wt_transf = wt_prob,
+         aa_wt_transf = aa_wt,
+         aa_pred_transf = aa_pred) %>%
+  select(gene, position, freq_pred_transf)
+
+for_2D_hist <- inner_join(transf_data, sa_data2)
 
 #==========================================================================================================
 # now lets look at n-eff correlations. CNN vs. Transformer.
@@ -321,4 +347,8 @@ means_cor <- data_cor %>%
   summarise(mean = mean(cor))
 #CNN mean cor: 0.325
 #transformer mean cor: 0.404
+
+#==========================================================================================================
+# now lets look at the RSA vs transformer confidence
+#==========================================================================================================
 

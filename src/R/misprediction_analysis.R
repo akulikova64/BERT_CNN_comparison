@@ -69,15 +69,50 @@ align_data2 <- align_data %>%
 
 joined3 <- inner_join(joined2, align_data2)
 
-#get mispredictions only:
+# get mispredictions only:
 mispredictions <- joined3 %>%
   filter(aa_pred != aa_wt) %>%
   unnest(align_data) %>%
   mutate(pred_prob = pmax())
 
+# count mispredictions: #these are the totals
+count_mispr <- joined3 %>%
+  mutate(mispredicted = aa_pred != aa_wt) %>%
+  group_by(group) %>%
+  count(mispredicted)
 
+get_mispr_group <- function(wt_cnn, pred_cnn, wt_trans, pred_trans) {
+  if (wt_cnn != pred_cnn & wt_trans != pred_trans) {
+    return('both mispr')
+  }
+  else if (wt_cnn != pred_cnn & wt_trans == pred_trans) {
+    return('cnn mispr')
+  }
+  else if (wt_cnn == pred_cnn & wt_trans != pred_trans) {
+    return('trans mispr')
+  }
+  else if (wt_cnn == pred_cnn & wt_trans == pred_trans) {
+    return('neither mispr')
+  }
+  NA_character_
+ 
+}
+  
+joined3_wider <- joined3 %>%
+  select(c(gene, position, aa_pred, aa_wt, group)) %>%
+  pivot_wider(names_from = group, values_from = c(aa_pred, aa_wt)) %>%
+  #wt_cnn, pred_cnn, wt_trans, pred_trans:
+  mutate(mispredictions = pmap_chr(list(aa_wt_cnn, aa_pred_cnn, aa_wt_transformer,aa_pred_transformer), get_mispr_group)) 
 
+count_mispr_results <- joined3_wider %>%
+  group_by(mispredictions) %>%
+  count()
 
+only_both <- joined3_wider %>%
+  filter(mispredictions == 'both mispr') %>%
+  mutate(match = aa_pred_cnn == aa_pred_transformer)
+  #group_by(match) %>%
+  #count()
 
 
 
