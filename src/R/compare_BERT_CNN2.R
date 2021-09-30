@@ -73,7 +73,8 @@ match_wt <- joined2 %>%
 #data entries where the predicted amino acid matches the wt
 stats_1 <- match_wt %>%
   group_by(gene, group) %>%
-  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)))
+  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)),
+            mean_conf = mean(freq_pred))
 
 means <- stats_1 %>%
   group_by(group) %>%
@@ -108,7 +109,7 @@ plot <- stats_1 %>%
     ) +
   scale_y_continuous(
     name = "Accuracy",
-    limits = c(0.1, 1.1),
+    limits = c(0.1, 1.0),
     breaks = seq(from = 0.1, to = 1.0, by = 0.1),
     expand = c(0, 0)) +
   scale_color_gradient(
@@ -123,9 +124,236 @@ plot <- stats_1 %>%
 
 plot
 
-ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_150.png"), plot = plot, width = 6, height = 6)
+#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_150.png"), plot = plot, width = 6, height = 6)
  
-#========================================================================
+#==========================================================================
+# lets bin the transofmer predicted proteins by accuracy and plot CNN conf
+#===========================================================================
+
+get_acc_bin <- function(x) {
+  
+  if (x > 0.2 & x <= 0.4) {
+    return("(0.2-0.4]")
+  }
+  else if (x > 0.4 & x <= 0.61) {
+    return("(0.4-0.6]")
+  }
+  else if (x > 0.61 & x <= 0.8) {
+    return("(0.6-0.8]")
+  } 
+  else if (x > 0.8 & x <= 1.0) {
+    return("(0.8-1.0]")
+  }
+  NA_character_
+}
+
+stats_new <- stats_1 %>%
+  mutate(acc_bin = map_chr(freq_predict_wt, get_acc_bin)) %>%
+  select(c(gene, group, freq_predict_wt, mean_conf, acc_bin))
+
+cnn <- stats_new %>%
+  filter(group == "cnn")
+
+transformer <- stats_new %>%
+  filter(group == "transformer")
+
+plot_conf_acc <- ggplot() +
+  geom_violin(data = cnn,
+              aes(y = mean_conf , x = acc_bin),
+              alpha = 0.5, 
+              size = 0.5, 
+              bw = 0.025,
+              fill = "#32a852",
+              color = "#154221",
+              position = position_nudge(x = 0.15, y = 0),
+              scale = "width",
+              width = 0.36
+              ) + 
+  geom_violin(data = transformer,
+              aes(y = mean_conf , x = acc_bin),
+              alpha = 0.5, 
+              size = 0.5, 
+              bw = 0.025,
+              fill = "#9d46b8",
+              color = "#3e184a",
+              position = position_nudge(x = -0.15, y = 0),
+              width = 0.36
+              ) + 
+  geom_sina(data = cnn,
+            aes(y = mean_conf , x = acc_bin),
+            size = 0.5,
+            color = "#154221",
+            show.legend = F,
+            position = position_nudge(x = 0.15, y = 0),
+            maxwidth = 0.36
+            ) +
+  geom_sina(data = transformer,
+            aes(y = mean_conf , x = acc_bin),
+            size = 0.5,
+            color = "#3e184a",
+            show.legend = F,
+            position = position_nudge(x = -0.15, y = 0),
+            maxwidth = 0.36
+            ) +
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position="none") +
+  scale_y_continuous(
+    name = "Mean Confidence",
+    limits = c(0.0, 1.0),
+    breaks = seq(from = 0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(fill = "") +
+  scale_x_discrete(
+    name = "Accuracy") +
+  scale_fill_manual(values = c("#32a852", "#9d46b8")) +
+  scale_color_manual(values = c("#154221", "#3e184a"))
+
+plot_conf_acc
+
+ggsave(filename = paste0("./analysis/figures/cnn_bert_acc_conf2.png"), plot = plot_conf_acc, width = 8, height = 5)
+
+counts <- stats_new %>%
+  group_by(group, acc_bin) %>%
+  count() %>%
+  ungroup()
+
+stats_new2 <- inner_join(stats_new, counts)
+  
+stats_new2 <- counts %>%
+  mutate(text_label = round(n, 2)) 
+
+stats_new2<- stats_new2 %>% 
+  add_row(group = "cnn", acc_bin = "(0.2-0.4]", n = 0, text_label = 0)
+
+
+plot_counts <- stats_new2 %>%
+  ggplot(aes(x = acc_bin, y = n, fill = fct_relevel(group, "transformer", "cnn"))) +
+  geom_col(alpha = 0.5, size = 0.5, position = position_dodge(preserve = "single")) + 
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position="none") +
+  scale_y_continuous(
+    name = "Count",
+    limits = c(0, 130),
+    breaks = seq(from = 0, to = 120, by = 20),
+    expand = c(0, 0)) +
+  labs(fill = "") +
+  scale_x_discrete(
+    name = "Accuracy") +
+  geom_text(aes(label = text_label), 
+            vjust = - 0.5, 
+            position = position_dodge(width = 0.8),
+            color = "black") +
+  scale_fill_manual(values = c("#9d46b8", "#32a852")) +
+  scale_color_manual(values = c("#3e184a", "#154221"))
+
+plot_counts
+
+#ggsave(filename = paste0("./analysis/figures/cnn_bert_acc_counts.png"), plot = plot_counts, width = 6, height = 5)
+
+legend <- get_legend(
+  plot_counts + 
+    guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom")
+)
+legend
+
+prow <- plot_grid(plot_conf_acc, plot_counts, nrow = 1, align = "h", labels = c('a', 'b'), axis = "h")
+figure2 <- plot_grid(prow, legend, ncol = 1, rel_heights = c(1, .1))
+figure2
+
+ggsave(filename = "./analysis/figures/figure_acc_bars.png", plot = figure2, width = 10, height = 4.5)
+
+#===============================================================================
+# lets find out what are the proteins that have the worst accuracy by the transformer
+
+stats_1 <- match_wt %>%
+  group_by(gene, group) %>%
+  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)),
+            mean_conf = mean(freq_pred))
+
+stats_new <- stats_1 %>%
+  mutate(acc_bin = map_chr(freq_predict_wt, get_acc_bin)) %>%
+  select(c(gene, group, freq_predict_wt, mean_conf, acc_bin))
+
+poor_acc <- stats_new %>%
+  filter(acc_bin == "(0.2-0.4]")
+
+cnn <- stats_new %>%
+  filter(group == "cnn") %>%
+  select(c(gene, freq_predict_wt)) %>%
+  rename(acc_cnn = freq_predict_wt)
+
+poor_acc$gene
+
+joined <- inner_join(cnn, poor_acc)
+
+
+#===============================================================================
+# lets see if sequence length varies with accuracy. Lets make violin plots again
+
+stats_1 <- match_wt %>%
+  group_by(gene, group) %>%
+  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)),
+            mean_conf = mean(freq_pred),
+            length = n())
+
+stats_new <- stats_1 %>%
+  mutate(acc_bin = map_chr(freq_predict_wt, get_acc_bin)) %>%
+  select(c(gene, group, freq_predict_wt, mean_conf, acc_bin, length))
+
+joined2 <- inner_join(stats_1, poor_acc)
+
+stat_data_1 <- stats_new %>%
+  group_by(group, acc_bin) %>%
+  summarise(estimate = mean(length),
+            std_error = sd(length)/sqrt(length(length)))
+
+plot_len <- stats_new %>%
+  ggplot(aes(x = acc_bin, y = length)) +
+  geom_boxplot(aes(fill = fct_relevel(group, "transformer", "cnn")),
+               alpha = 0.2, 
+               size = 0.3,
+               color = "black",
+               position = position_dodge(width = 0.8, preserve = "single")) + 
+  geom_sina(aes(color = fct_relevel(group, "transformer", "cnn")),
+            alpha = 0.4,
+            show.legend = F,
+            size = 0.9) +
+  # geom_pointrange(data = stat_data_1, aes(x = acc_bin,
+  #                                         y = estimate,
+  #                                         ymin = estimate - std_error,
+  #                                         ymax = estimate + std_error),
+  #                 color = "#c96800", alpha = 0.7, size = 0.3,
+  #                 position=position_dodge(width = 0.8, preserve = "single")) +
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position="top") +
+  scale_y_continuous(
+    name = "Sequence Length",
+    limits = c(45, 300),
+    breaks = seq(from = 50, to = 300, by = 50),
+    expand = c(0, 0)) +
+  labs(fill = "") +
+  scale_x_discrete(
+    name = "Accuracy") +
+  scale_fill_manual(values = c("#9d46b8", "#32a852")) +
+  scale_color_manual(values = c("#3e184a", "#154221"))
+
+plot_len
+
+ggsave(filename = "./analysis/figures/figure_acc_length.png", plot = plot_len, width = 7, height = 4.5)
+
+
+
+#===============================================================================
 #lets look at CNN confidence vs. Accuracy for both models:
 get_pred_bin <- function(x) {
   
@@ -243,8 +471,8 @@ plot_2D_hist <- for_2D_hist %>%
   #geom_pointrange() +
   geom_hex(bins = 30) +
   scale_x_continuous(
-    name = "Relative Solvent Accessibiity (Å^2)",
-    #limits = c(0.0, 1.7),
+    name = "Relative Solvent Accessibiity (Ã…^2)",
+    limits = c(0.0, 1.0),
     #breaks = seq(0.0, 1.0, by = 0.2),
     expand = c(0, 0)) +
   scale_y_continuous(
@@ -265,10 +493,10 @@ plot_2D_hist <- for_2D_hist %>%
 
 plot_2D_hist
 
-ggsave(filename = paste("./analysis/figures/trans_conf_vs_SA_150.png"), plot = plot_2D_hist, width = 8, height = 6)
+ggsave(filename = paste("./analysis/figures/trans_conf_vs_SA_150-2.png"), plot = plot_2D_hist, width = 8, height = 6)
 
 joined_data <- inner_join(cnn_data, transf_data)
-cnn_data_clean <- joined_data %>%
+cnn_data_clean <- cnn_data %>%
   select(c(gene, position, freq_pred_cnn))
 
 for_2D_hist <- inner_join(cnn_data_clean, sa_data2)
@@ -278,8 +506,8 @@ plot_2D_hist <- for_2D_hist %>%
   #geom_pointrange() +
   geom_hex(bins = 30) +
   scale_x_continuous(
-    name = "Relative Solvent Accessibiity (Å^2)",
-    #limits = c(0.0, 1.7),
+    name = "Relative Solvent Accessibiity (Ã…^2)",
+    limits = c(0.0, 1.0),
     #breaks = seq(0.0, 1.0, by = 0.2),
     expand = c(0, 0)) +
   scale_y_continuous(
