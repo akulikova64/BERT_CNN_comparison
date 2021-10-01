@@ -376,16 +376,87 @@ stats_1 <- with_struc %>%
   summarise(accuracy = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)))
 
 for_violin <- stats_1 %>%
-  pivot_wider(names_from = group, values_from = accuracy)
-  
+  pivot_wider(names_from = group, values_from = accuracy) %>%
+  mutate(change = cnn - transformer)
 
-violin_plot <- stats_1 %>%
-  ggplot(aes(x = sec_struc, y = accuracy)) +
-  geom_violin()
+fills = c("#bf8040", "#ac5396", "#70adc2", "#748f3d", "#cc5933", "#7070c2")
+  
+#fills = c("#ac5396","#bf8040", "#70adc2","#748f3d", "#cc5933", "#7070c2")
+colors = c("#470e39", "#522c05", "#183f4d","#29380b", "#6b1f06", "#0c0c5c")
+
+
+violin_plot <- for_violin %>%
+  ggplot(aes(x = fct_relevel(second_struc, "Alpha helix", "Beta strand", "Turn", "Random coil", "Noncanon. helix", "Bridge"), y = change, fill = second_struc, color = second_struc)) +
+  geom_hline(yintercept = 0, color = "#666666", linetype="dashed") +
+  theme_cowplot(16) +
+  geom_violin() +
+  geom_sina() + 
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position="none",
+        axis.text.x = element_text(
+          size = 16,
+          color = "black",
+          angle = 45, 
+          hjust = 1,
+          vjust = 1)
+        ) + 
+  #axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)
+  scale_y_continuous(
+    name = "Change in accuracy \n from CNN to transformer",
+    limits = c(-1.0, 1.0),
+    breaks = seq(from = -1.0, to = 1.0, by = 0.2),
+    expand = c(0, 0)) +
+  labs(fill = "") +
+  scale_x_discrete(
+    name = "",
+    position = "bottom") +
+  scale_fill_manual(values = fills) +
+  scale_color_manual(values = colors)
+
 
 violin_plot
 
+ggsave(filename = "./analysis/figures/violin_trans_cnn_struc.png", plot = violin_plot, width = 8, height = 5)
 
+for_bar <- for_violin %>%
+  filter(change != 0) %>%
+  mutate(change_bin = ifelse(change < 0, "transformer better", "cnn better")) %>%
+  group_by(change_bin, second_struc) %>%
+  count() %>%
+  mutate(count = ifelse(change_bin == "transformer better", -n, n)) %>%
+  mutate(text_label = abs(count)) 
+
+bar_chart <- for_bar %>%
+  ggplot(aes(y = fct_rev(fct_relevel(second_struc, "Alpha helix", "Beta strand", "Turn", "Random coil", "Noncanon. helix", "Bridge")), x = count, fill = change_bin)) +
+  geom_col(alpha = 0.7) +
+  geom_vline(xintercept = 0, color = "#666666", linetype="dashed") +
+  scale_fill_manual(values = c("#216610", "#d16d0f")) +
+  theme_cowplot(16) +
+  scale_x_continuous(
+    name = "Protein Count",
+    limits = c(-70, 90),
+    breaks = seq(-70, 80, by = 10),
+    labels = c("70", "60", "50", "40", "30", "20", "10", "0", "10", "20", "30", "40", "50", "60", "70", "80"),
+    expand = c(0, 0.03)) +
+  labs(fill = "") +
+  scale_y_discrete(
+    name = "",
+    expand = c(0.03, 0.03)) + 
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        legend.position="top") +
+  geom_text(aes(label = text_label), 
+            vjust = 0.5, 
+            hjust = -0.5,
+            #position = position_dodge(width = 0.8),
+            color = "black") 
+
+bar_chart
+
+ggsave(filename = "./analysis/figures/bar_trans_cnn_struc.png", plot = bar_chart, width = 9, height = 5)
 
 
 

@@ -213,7 +213,7 @@ plot_conf_acc <- ggplot() +
 
 plot_conf_acc
 
-ggsave(filename = paste0("./analysis/figures/cnn_bert_acc_conf2.png"), plot = plot_conf_acc, width = 8, height = 5)
+#ggsave(filename = paste0("./analysis/figures/cnn_bert_acc_conf2.png"), plot = plot_conf_acc, width = 8, height = 5)
 
 counts <- stats_new %>%
   group_by(group, acc_bin) %>%
@@ -267,9 +267,9 @@ prow <- plot_grid(plot_conf_acc, plot_counts, nrow = 1, align = "h", labels = c(
 figure2 <- plot_grid(prow, legend, ncol = 1, rel_heights = c(1, .1))
 figure2
 
-ggsave(filename = "./analysis/figures/figure_acc_bars.png", plot = figure2, width = 10, height = 4.5)
+#ggsave(filename = "./analysis/figures/figure_acc_bars.png", plot = figure2, width = 10, height = 4.5)
 
-#===============================================================================
+#=====================================================================================
 # lets find out what are the proteins that have the worst accuracy by the transformer
 
 stats_1 <- match_wt %>%
@@ -349,7 +349,7 @@ plot_len <- stats_new %>%
 
 plot_len
 
-ggsave(filename = "./analysis/figures/figure_acc_length.png", plot = plot_len, width = 7, height = 4.5)
+#ggsave(filename = "./analysis/figures/figure_acc_length.png", plot = plot_len, width = 7, height = 4.5)
 
 
 
@@ -466,7 +466,7 @@ transf_data <- trans_data %>%
 
 for_2D_hist <- inner_join(transf_data, sa_data2)
 
-plot_2D_hist <- for_2D_hist %>%
+trans_hist <- for_2D_hist %>%
   ggplot(aes(x = SASA_rel_total, y = freq_pred_transf)) +
   #geom_pointrange() +
   geom_hex(bins = 30) +
@@ -489,11 +489,12 @@ plot_2D_hist <- for_2D_hist %>%
     panel.grid.minor.x = element_line(color = "grey92", size=0.5),
     panel.grid.major.y = element_line(color = "grey92", size=0.5),
     panel.grid.minor.y = element_line(color = "grey92", size=0.5),
-    panel.spacing = unit(2, "lines"))
+    panel.spacing = unit(2, "lines"),
+    legend.position = "none")
 
-plot_2D_hist
+trans_hist
 
-ggsave(filename = paste("./analysis/figures/trans_conf_vs_SA_150-2.png"), plot = plot_2D_hist, width = 8, height = 6)
+#ggsave(filename = paste("./analysis/figures/trans_conf_vs_SA_150-2.png"), plot = plot_2D_hist, width = 8, height = 6)
 
 joined_data <- inner_join(cnn_data, transf_data)
 cnn_data_clean <- cnn_data %>%
@@ -501,7 +502,7 @@ cnn_data_clean <- cnn_data %>%
 
 for_2D_hist <- inner_join(cnn_data_clean, sa_data2)
 
-plot_2D_hist <- for_2D_hist %>%
+cnn_hist <- for_2D_hist %>%
   ggplot(aes(x = SASA_rel_total, y = freq_pred_cnn)) +
   #geom_pointrange() +
   geom_hex(bins = 30) +
@@ -524,11 +525,56 @@ plot_2D_hist <- for_2D_hist %>%
     panel.grid.minor.x = element_line(color = "grey92", size=0.5),
     panel.grid.major.y = element_line(color = "grey92", size=0.5),
     panel.grid.minor.y = element_line(color = "grey92", size=0.5),
-    panel.spacing = unit(2, "lines"))
+    panel.spacing = unit(2, "lines"),
+    legend.position = "none")
 
-plot_2D_hist
+cnn_hist
+
+legend <- get_legend(
+  cnn_hist + 
+    theme(legend.position = "right")
+)
+
+prow <- plot_grid(trans_hist, cnn_hist, nrow = 1, align = "h", labels = c('a', 'b'), axis = "h")
+figure2 <- plot_grid(prow, legend, ncol = 2, rel_widths = c(1, .1))
+figure2
+
+ggsave(filename = "./analysis/figures/trans_cnn_RSA.png", plot = figure2, width = 10, height = 4.5)
+
 
 ggsave(filename = paste("./analysis/figures/cnn_conf_vs_SA_150.png"), plot = plot_2D_hist, width = 8, height = 6)
+
+#----------------------------------------------------------------------------------------
+# now lets look at confident positions (>0.7) for cnn and trans and get density plot.
+
+trans_sa <- inner_join(transf_data, sa_data2)
+trans_cnn_sa <- inner_join(cnn_data_clean, trans_sa)
+
+fills <- c("#9880b0", "#a3ba4e")
+colors <- c("#30154d", "#37420e")
+
+for_density_high <- trans_cnn_sa %>%
+  pivot_longer(cols = c(freq_pred_cnn, freq_pred_transf), names_to = "group", values_to = "conf") %>%
+  filter(conf >= 0.7) 
+
+density_plot_high <- for_density_high %>%
+  ggplot(aes(x = SASA_rel_total, fill = fct_rev(group))) +
+  geom_density(alpha = 0.5) +
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = fills)
+
+density_plot_high
+
+for_density_low <- trans_cnn_sa %>%
+  pivot_longer(cols = c(freq_pred_cnn, freq_pred_transf), names_to = "group", values_to = "conf") %>%
+  filter(conf < 0.4)
+
+density_plot_low <- for_density_low %>%
+  ggplot(aes(x = SASA_rel_total, fill = group)) +
+  geom_density(alpha = 0.4)
+
+density_plot_low
+
 
 
 
