@@ -558,10 +558,27 @@ for_density_high <- trans_cnn_sa %>%
   filter(conf >= 0.7) 
 
 density_plot_high <- for_density_high %>%
-  ggplot(aes(x = SASA_rel_total, fill = fct_rev(group))) +
+  ggplot(aes(x = SASA_rel_total, fill = fct_rev(group), color = fct_rev(group))) +
   geom_density(alpha = 0.5) +
   scale_color_manual(values = colors) +
-  scale_fill_manual(values = fills)
+  scale_fill_manual(values = fills, labels = c("transformer", "cnn")) +
+  theme_cowplot(16) +
+  scale_y_continuous(
+    name = "Density",
+    expand = c(0, 0)
+  ) +
+  scale_x_continuous(
+    name = "Relative Solvent Accessibiity (Å^2)",
+    limits = c(0.0, 1.0),
+    breaks = seq(0.0, 1.0, by = 0.25),
+    expand = c(0, 0)) +
+  theme(
+    axis.text = element_text(color = "black", size = 14),
+    strip.text.x = element_text(size = 16),
+    panel.grid.major.x = element_line(color = "grey92", size=0.5),
+    panel.grid.minor.x = element_line(color = "grey92", size=0.5),
+    panel.spacing = unit(2, "lines"),
+    legend.position = "none")
 
 density_plot_high
 
@@ -570,12 +587,43 @@ for_density_low <- trans_cnn_sa %>%
   filter(conf < 0.4)
 
 density_plot_low <- for_density_low %>%
-  ggplot(aes(x = SASA_rel_total, fill = group)) +
-  geom_density(alpha = 0.4)
+  ggplot(aes(x = SASA_rel_total, fill = fct_rev(group), color = fct_rev(group))) +
+  geom_density(alpha = 0.4) +
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = fills) +
+  labs(fill = "model") +
+  scale_x_continuous(
+    name = "Relative Solvent Accessibiity (Å^2)",
+    limits = c(0.0, 1.0),
+    breaks = seq(0.0, 1.0, by = 0.25),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "Density",
+    expand = c(0, 0)
+  ) +
+  theme_cowplot(16) +
+  theme(
+    axis.text = element_text(color = "black", size = 14),
+    strip.text.x = element_text(size = 16),
+    panel.grid.major.x = element_line(color = "grey92", size=0.5),
+    panel.grid.minor.x = element_line(color = "grey92", size=0.5),
+    panel.spacing = unit(2, "lines"),
+    legend.position = "none")
 
 density_plot_low
 
+legend <- get_legend(
+  density_plot_high + 
+    labs(fill = "") +
+    guides(color = FALSE) +
+    theme(legend.position = "bottom")
+)
 
+prow <- plot_grid(density_plot_high, density_plot_low, nrow = 1, align = "h", labels = c('a', 'b'), axis = "h")
+figure3 <- plot_grid(prow, legend, ncol = 1, rel_heights = c(1, .1))
+figure3
+
+ggsave(filename = "./analysis/figures/trans_cnn_RSA_high_low.png", plot = figure3, width = 10, height = 4.5)
 
 
 #==========================================================================================================
@@ -688,6 +736,10 @@ means_cor <- data_cor %>%
   summarise(mean = mean(cor))
 #CNN mean cor: 0.325
 #transformer mean cor: 0.404
+
+
+#----------------------------------------------------------------------------
+# another violin plot, only with average confidence per protein this time.
 
 
 
