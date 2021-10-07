@@ -68,6 +68,40 @@ get_aa_name <- function(x) {
   NA_character_
 }
 
+get_mut <- function(x) {
+  
+  if (x == 8) {
+    return('to K')
+  }
+  else if (x == 11) {
+    return('to K')
+  }
+  else if (x == 12) {
+    return('to R')
+  }
+  else if (x == 22) {
+    return('to K')
+  }
+  else if (x == 70) {
+    return('to K')
+  }
+  else if (x == 72) {
+    return('to K')
+  }
+  else if (x == 83) {
+    return('to R')
+  }
+  else if (x == 85) {
+    return('to R')
+  }
+  else if (x == 86) {
+    return('to K')
+  }
+  else {
+    return('no change')
+  }
+}
+
 
 data <- read.csv(file = "./output/cnn_wt_max_freq_3ogo.csv", header=TRUE, sep=",")
 
@@ -134,6 +168,10 @@ for_KR_plots2 <- for_KR_plots %>%
   mutate(wt_K = aa_wt == 'K',
          wt_R = aa_wt == 'R')
 
+
+for_KR_plots3 <- for_KR_plots2 %>%
+  mutate(mut = map_chr(position, get_mut))
+
 labels <- c("M","Q","V","Q","L","V","E","S","G","G","A","L","V","Q","P","G","G","S","L","R","L","S","C","A","A","S","G","F","P","V","N","R","Y","S","M","R","W","Y","R","Q","A","P","G","K","E","R","E","W","V","A","G","M","S","S","A","G","D","R","S","S","Y","E","D","S","V","K","G","R","F","T","I","S","R","D","D","A","R","N","T","V","Y","L","Q","M","N","S","L","K","P","E","D","T","A","V","Y","Y","C","N","V","N","V","G","F","E","Y","W","G","Q","G","T","Q","V","T","V","S","S")
 
 plot_K <- for_KR_plots2 %>%
@@ -163,7 +201,9 @@ plot_K <- for_KR_plots2 %>%
 
 plot_K
 
-ggsave(filename = "./analysis/figures/3ogo_lysine.png", plot = plot_K, width = 12, height = 4)
+# coloring in points by experimental data (ones that were really mutated)
+
+#ggsave(filename = "./analysis/figures/3ogo_lysine.png", plot = plot_K, width = 12, height = 4)
 
 # now lets make a plot for Arginine:
 

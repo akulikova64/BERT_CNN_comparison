@@ -125,7 +125,10 @@ plot <- stats_1 %>%
 plot
 
 #ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_150.png"), plot = plot, width = 6, height = 6)
- 
+
+diagonal <- stats_1 %>%
+ select(c())
+
 #==========================================================================
 # lets bin the transofmer predicted proteins by accuracy and plot CNN conf
 #===========================================================================
@@ -738,8 +741,6 @@ means_cor <- data_cor %>%
 #transformer mean cor: 0.404
 
 
-#----------------------------------------------------------------------------
-# another violin plot, only with average confidence per protein this time.
 
 
 

@@ -736,13 +736,12 @@ for_odds <- for_barplot_2 %>%
 plot_odds <- for_odds %>%
   ggplot(aes(x = odds, y = fct_reorder(aa_wt, odds), fill = class)) +
   geom_col(alpha = 0.9) +
-  geom_text(aes(label = round(odds, 2), hjust = -0.3)) +
   scale_fill_manual(
     values = fills) +
   scale_x_log10(
     name = "Odds ratio (log scale)"
   ) +
-  geom_hline(yintercept = 12.5, color = "#666666", linetype="dashed") +
+  geom_hline(yintercept = 12.5, color = "grey20", alpha = 0.8, size = 0.85, linetype="dashed") +
   scale_y_discrete(
     name = "",
     expand = c(0.03, 0.04)) + 

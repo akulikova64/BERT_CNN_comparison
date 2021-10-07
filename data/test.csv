@@ -1,0 +1,457 @@
+gene,family,superfamily,structural_class,protein_type
+1atl,Reprolysin-like,Metalloproteases (zincins)- catalytic domain,Alpha and beta proteins,Globular proteins
+1a3a,"
+IIA_domain_of_mannitol-specific_and_ntr_phosphotransferase_EII",Phoshotransferase/anion transport protein,Alpha and beta proteins,Globular proteins
+1a6m,"
+Globins","
+Globin-like",All alpha proteins,Globular proteins
+1a70,"
+2Fe-2S_ferredoxin-related","
+2Fe-2S ferredoxin-like",Alpha and beta proteins,Globular proteins
+1aap,"
+Small_Kunitz-type_inhibitors_&_BPTI-like_toxins","
+BPTI-like",Small proteins,Globular proteins
+1aba,"
+Thioltransferase","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1ag6,"
+Plastocyanin/azurin-like","
+Cupredoxins",All beta proteins,"
+Globular proteins"
+1aoe,"
+Dihydrofolate_reductases","
+Dihydrofolate reductase-like",Alpha and beta proteins,"
+Globular proteins"
+1atz,"
+Integrin_A_(or_I)_domain","
+VWA-like",Alpha and beta proteins,"
+Globular proteins"
+1avs,"
+Calmodulin-like","
+EF-hand",All alpha proteins,"
+Globular proteins"
+1bdo,"
+Biotinyl/lipoyl-carrier_proteins_and_domains","
+Single hybrid motif",All beta proteins,"
+Globular proteins"
+1beb,"
+Retinol_binding_protein-like","
+Lipocalins",All beta proteins,"
+Globular proteins"
+1beh,"
+phosphatidylethanolamine_binding_protein","
+PEBP-like",All beta proteins,"
+Globular proteins"
+1bkr,"
+Calponin-homology_domain__type_1/2_family","
+Calponin-homology domain- CH-domain",All alpha proteins,"
+Globular proteins"
+1brf,"
+Rubredoxin","
+Rubredoxin-like",Small proteins,"
+Globular proteins"
+1bsg,"
+beta-Lactamase/D-ala_carboxypeptidase","
+beta-lactamase/transpeptidase-like",Alpha and beta proteins,"
+Globular proteins"
+1c44,"
+Sterol_carrier_protein_(SCP)-related","
+SCP2-like",Alpha and beta proteins,"
+Globular proteins"
+1c52,"
+Monodomain_cytochrome_c","
+Cytochrome c",All alpha proteins,"
+Globular proteins"
+1c9o,"
+Cold_shock_DNA-binding_domain-like","
+Nucleic acid-binding proteins",All beta proteins,"
+Globular proteins"
+1cc8,"
+HMA__heavy_metal-associated_domain","
+HMA- heavy metal-associated domain",Alpha and beta proteins,"
+Globular proteins"
+1chd,"
+CheB_C-terminal_domain-like","
+Methylesterase CheB- C-terminal domain",Alpha and beta proteins,"
+Globular proteins"
+1cjw,"
+N-acetyltransferase__NAT","
+Acyl-CoA N-acyltransferases (Nat)",Alpha and beta proteins,"
+Globular proteins"
+1cke,"
+Adenylate_kinase-like","
+P-loop nucleotide/nucleoside kinase-like",Alpha and beta proteins,"
+Globular proteins"
+1ctf,NA,NA,NA,NA
+1cxy,"
+Cytochrome_b5","
+Cytochrome b5-like heme/steroid binding domain",Alpha and beta proteins,Globular proteins
+1czn,"
+Flavodoxin-related","
+Flavoproteins",Alpha and beta proteins,Globular proteins
+1d0q,"
+DNA_primase_zinc_finger","
+Zinc beta-ribbon",Small proteins,Globular proteins
+1d1q,"
+Low-molecular-weight_phosphotyrosine_protein_phosphatases","
+Phosphotyrosine protein phosphatases I",Alpha and beta proteins,Globular proteins
+1d4o,"
+Transhydrogenase_domain_III_(dIII)","
+DHS-like NAD/FAD-binding domain",Alpha and beta proteins,Globular proteins
+1dbx,"
+ProX-like","
+ProX-like",Alpha and beta proteins,Globular proteins
+1dix,"
+Ribonuclease_Rh-like","
+Ribonuclease Rh-like",Alpha and beta proteins,Globular proteins
+1dlw,"
+Truncated_hemoglobin","
+Globin-like",All alpha proteins,Globular proteins
+1dmg,"
+Ribosomal_protein_L4","
+Ribosomal protein L4",Alpha and beta proteins,Globular proteins
+1dqg,"
+Cysteine_rich_domain","
+Ricin B-like lectins",All beta proteins,Globular proteins
+1dsx,"
+Tetramerization_domain_of_potassium_channels","
+POZ domain",Alpha and beta proteins,Globular proteins
+1eaz,"
+Pleckstrin-homology_domain_(PH_domain)","
+PH domain-like",All beta proteins,Globular proteins
+1ej0,"
+RNA_methyltransferase_FtsJ","
+S-adenosyl-L-methionine-dependent methyltransferases",Alpha and beta proteins,Globular proteins
+1ej8,"
+Cu_Zn_superoxide_dismutase-like","
+Cu-Zn superoxide dismutase-like",All beta proteins,Globular proteins
+1ek0,"
+Ras-like_monodomain_GTPases","
+Ras-like P-loop GTPases",Alpha and beta proteins,Globular proteins
+1f6b,"
+Ras-like_monodomain_GTPases","
+Ras-like P-loop GTPases",Alpha and beta proteins,Globular proteins
+1fcy,"
+Nuclear_receptor_ligand-binding_domain","
+Nuclear receptor ligand-binding domain",All alpha proteins,Globular proteins
+1fk5,"
+Plant_lipid-transfer_and_hydrophobic_proteins","
+Bifunctional inhibitor/lipid-transfer protein/seed storage 2S albumin",All alpha proteins,Globular proteins
+1fl0,"
+Myf_domain","
+Nucleic acid-binding proteins",All beta proteins,Globular proteins
+1fna,"
+Fibronectin_type_III","
+Fibronectin type III",All beta proteins,Globular proteins
+1fqt,"
+Rieske_iron-sulfur_protein_(ISP)","
+ISP domain",All beta proteins,Globular proteins
+1fvg,"
+Peptide_methionine_sulfoxide_reductase","
+Peptide methionine sulfoxide reductase",Alpha and beta proteins,Globular proteins
+1fvk,"
+DsbA-like","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1fx2,"
+Adenylyl_and_guanylyl_cyclase_catalytic_domain","
+Nucleotide cyclase/DNA polymerase palm domain-like",Alpha and beta proteins,Globular proteins
+1g2r,"
+YlxR-like","
+YlxR-like",Alpha and beta proteins,Globular proteins
+1g9o,"
+PDZ_domain","
+PDZ domain-like",All beta proteins,Globular proteins
+1gbs,"
+G-type_lysozyme","
+Lysozyme-like",Alpha and beta proteins,Globular proteins
+1gmi,"
+PLC-like_(P_variant)","
+C2 domain (calcium/lipid-binding domain- calb)",All beta proteins,Globular proteins
+1gmx,"
+Single-domain_sulfurtransferase","
+Rhodanese/Cell cycle control phosphatase",Alpha and beta proteins,Globular proteins
+1guu,"
+Myb/SANT_domain","
+Homeodomain-like",All alpha proteins,Globular proteins
+1gz2,"
+C-type_lectin_domain","
+C-type lectin-like",Alpha and beta proteins,Globular proteins
+1gzc,"
+Legume_lectins","
+Concanavalin A-like lectins/glucanases",All beta proteins,Globular proteins
+1h0p,"
+Cyclophilin_peptidylprolyl_isomerase-like","
+Cyclophilin-like",All beta proteins,Globular proteins
+1h2e,"
+Cofactor-dependent_phosphoglycerate_mutase","
+Histidine phosphatase-like",Alpha and beta proteins,Globular proteins
+1h4x,"
+Anti-sigma_factor_antagonist_SpoIIaa","
+SpoIIaa-like",Alpha and beta proteins,Globular proteins
+1h98,"
+7-Fe_ferredoxin","
+4Fe-4S ferredoxins",Alpha and beta proteins,Globular proteins
+1hdo,"
+Short-chain_dehydrogenases/reductases__SDR","
+SDR-like",Alpha and beta proteins,Globular proteins
+1hfc,"
+Matrix_metalloproteases__catalytic_domain","
+Metalloproteases (zincins)- catalytic domain",Alpha and beta proteins,Globular proteins
+1hh8,"
+Tetratricopeptide_repeat_(TPR)","
+TPR-like",All alpha proteins,Globular proteins
+1htw,"
+TsaE-like","
+TsaE-like",Alpha and beta proteins,Globular proteins
+1hxn,"
+Hemopexin-like_domain","
+Hemopexin-like domain",All beta proteins,Globular proteins
+1i1j,"
+SH3-domain","
+SH3-domain",All beta proteins,Globular proteins
+1i1n,"
+Protein-L-isoaspartyl_O-methyltransferase","
+S-adenosyl-L-methionine-dependent methyltransferases",Alpha and beta proteins,Globular proteins
+1i4j,"
+Ribosomal_protein_L22","
+Ribosomal protein L22",Alpha and beta proteins,Globular proteins
+1i58,"
+Histidine_kinase","
+GHKL (Gyrase- Hsp90- Histidine Kinase- MutL) domain-like",Alpha and beta proteins,Globular proteins
+1i5g,"
+Glutathione_peroxidase-like","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1i71,"
+Kringle_modules","
+Kringle-like",Small proteins,Globular proteins
+1ihz,"
+Staphylococcal_nuclease","
+Staphylococcal nuclease",All beta proteins,Globular proteins
+1iib,"
+PTS_system__Lactose/Cellobiose_specific_IIB_subunit","
+PTS system IIB component-like",Alpha and beta proteins,Globular proteins
+1im5,"
+Isochorismatase-like_hydrolases","
+Isochorismatase-like hydrolases",Alpha and beta proteins,Globular proteins
+1iwd,"
+Papain-like","
+Cysteine proteinases",Alpha and beta proteins,Globular proteins
+1j3a,"
+Ribosomal_protein_L13","
+Ribosomal protein L13",Alpha and beta proteins,Globular proteins
+1jbe,"
+CheY-related","
+CheY-like",Alpha and beta proteins,Globular proteins
+1jbk,"
+Extended_AAA-ATPase_domain","
+RecA-like P-loop NTPases",Alpha and beta proteins,Globular proteins
+1jfu,"
+Glutathione_peroxidase-like","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1jfx,"
+1_4-beta-N-acetylmuraminidase","
+(Trans)glycosidases",Alpha and beta proteins,Globular proteins
+1jkx,"
+GART-like","
+Formyltransferase",Alpha and beta proteins,Globular proteins
+1jl1,"
+Ribonuclease_H-like","
+Ribonuclease H-like",Alpha and beta proteins,Globular proteins
+1jo0,"
+YhbY-like","
+YhbY-like",Alpha and beta proteins,Globular proteins
+1jo8,"
+SH3-domain","
+SH3-domain",All beta proteins,Globular proteins
+1jos,"
+Ribosome-binding_factor_A__RbfA","
+RbfA-like",Alpha and beta proteins,Globular proteins
+1jvw,"
+FKBP_immunophilin/proline_isomerase","
+Rotamase-like",Alpha and beta proteins,Globular proteins
+1jwq,"
+N-acetylmuramoyl-L-alanine_amidase-like","
+Zn-dependent exopeptidases",Alpha and beta proteins,Globular proteins
+1jyh,"
+Gyrase_inhibitory_protein_GyrI_(SbmC__YeeB)","
+Probable bacterial effector-binding domain",Alpha and beta proteins,Globular proteins
+1k6k,"
+Double_Clp-N_motif","
+Double Clp-N motif",All alpha proteins,Globular proteins
+1k7c,"
+Rhamnogalacturonan_acetylesterase","
+SGNH hydrolase-like",Alpha and beta proteins,Globular proteins
+1k7j,"
+YrdC/Sua5-like","
+YrdC/RibB-like",Alpha and beta proteins,Globular proteins
+1kid,"
+GroEL-like_chaperone__intermediate_domain","
+GroEL-intermediate domain like",Alpha and beta proteins,Globular proteins
+1kq6,"
+PX_domain","
+PX domain",Alpha and beta proteins,Globular proteins
+1kqr,"
+vp4_sialic_acid_binding_domain","
+Concanavalin A-like lectins/glucanases",All beta proteins,Globular proteins
+1ktg,"
+MutT-like","
+Nudix",Alpha and beta proteins,Globular proteins
+1ku3,"
+Sigma4_domain","
+Sigma factor domain-like",All alpha proteins,Globular proteins
+1kw4,"
+SAM_(sterile_alpha_motif)_domain","
+SAM/Pointed domain",All alpha proteins,Globular proteins
+1lm4,"
+Peptide_deformylase","
+Peptide deformylase",Alpha and beta proteins,Globular proteins
+1lo7,"
+4HBT-like","
+Thioesterase/thiol ester dehydrase-isomerase-like",Alpha and beta proteins,Globular proteins
+1lpy,"
+Phage_lysozyme","
+Lysozyme-like",Alpha and beta proteins,Globular proteins
+1m4j,"
+Cofilin-like","
+Actin depolymerizing proteins",Alpha and beta proteins,Globular proteins
+1m8a,"
+Interleukin_8-like_chemokines","
+Interleukin 8-like chemokines",Alpha and beta proteins,Globular proteins
+1mk0,"
+GIY-YIG_endonuclease","
+GIY-YIG endonuclease",Alpha and beta proteins,Globular proteins
+1mug,"
+Mug-like","
+Uracil-DNA glycosylase-like",Alpha and beta proteins,Globular proteins
+1nb9,"
+ATP-dependent_riboflavin_kinase-like","
+Riboflavin kinase-like",All beta proteins,Globular proteins
+1ne2,"
+Ta1320-like","
+S-adenosyl-L-methionine-dependent methyltransferases",Alpha and beta proteins,Globular proteins
+1nps,"
+Crystallins/Ca-binding_development_proteins","
+Gamma-Crystallin-like",All beta proteins,Globular proteins
+1nrv,"
+SH2_domain","
+SH2 domain",Alpha and beta proteins,Globular proteins
+1ny1,"
+NodB-like","
+Glycoside hydrolase/deacetylase",Alpha and beta proteins,Globular proteins
+1o1z,"
+Glycerophosphoryl_diester_phosphodiesterase","
+PLC-like phosphodiesterases",Alpha and beta proteins,Globular proteins
+1p90,"
+Nitrogenase_accessory_factor","
+Nitrogenase accessory factor-like",Alpha and beta proteins,Globular proteins
+1pch,"
+Hpr-like","
+Hpr-like",Alpha and beta proteins,Globular proteins
+1pko,"
+V_set_domains-like","
+Immunoglobulin (Ig) domain-like",All beta proteins,Globular proteins
+1qf9,"
+Adenylate_kinase-like","
+P-loop nucleotide/nucleoside kinase-like",Alpha and beta proteins,Globular proteins
+1qjp,"
+Outer_membrane_protein_OmpA-like","
+OMPA barrel-like",All beta proteins,"
+Membrane proteins"
+1ql0,"
+DNA/RNA_non-specific_endonuclease","
+His-Me finger endonucleases",Alpha and beta proteins,Globular proteins
+1r26,"
+Thioltransferase","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1roa,"
+Cystatins","
+Cystatin/monellin",Alpha and beta proteins,Globular proteins
+1rw1,"
+ArsC-like","
+Thioredoxin-like",Alpha and beta proteins,Globular proteins
+1rw7,NA,NA,NA,NA
+1ryb,"
+Peptidyl-tRNA_hydrolase-like","
+Peptidyl-tRNA hydrolase-like",Alpha and beta proteins,Globular proteins
+1smx,"
+Cold_shock_DNA-binding_domain-like","
+Nucleic acid-binding proteins",All beta proteins,Globular proteins
+1svy,"
+Gelsolin-like","
+Actin depolymerizing proteins",Alpha and beta proteins,Globular proteins
+1t8k,"
+Acyl-carrier_protein_(ACP)","
+ACP-like",All alpha proteins,Globular proteins
+1tif,"
+Translation_initiation_factor_IF3__N-terminal_domain","
+Translation initiation factor IF3- N-terminal domain",Alpha and beta proteins,Globular proteins
+1tqg,"
+Chemotaxis_protein_CheA_P1_domain","
+Histidine-containing phosphotransfer domain- HPT domain",All alpha proteins,Globular proteins
+1tqh,"
+Carboxylesterase/lipase","
+alpha/beta-Hydrolases",Alpha and beta proteins,Globular proteins
+1tzv,"
+Antitermination_factor_NusB","
+NusB-like",All alpha proteins,Globular proteins
+1vfy,"
+FYVE__a_phosphatidylinositol-3-phosphate_binding_domain","
+FYVE/PHD zinc finger",Small proteins,Globular proteins
+1vhu,"
+Macro_domain","
+Macro domain-like",Alpha and beta proteins,Globular proteins
+1vmb,"
+Ribosomal_protein_S6","
+Ribosomal protein S6",Alpha and beta proteins,Globular proteins
+1vp6,"
+cNMP-binding_domain","
+cAMP-binding domain-like",All beta proteins,Globular proteins
+1w0h,"
+DnaQ-like_3'-5'_exonuclease","
+Ribonuclease H-like",Alpha and beta proteins,Globular proteins
+1whi,"
+Ribosomal_protein_L14","
+50S Ribosomal protein L14-like",All beta proteins,Globular proteins
+1wjx,"
+Small_protein_B_(SmpB)","
+Small protein B (SmpB)",All beta proteins,Globular proteins
+1wkc,"
+Methenyltetrahydrofolate_synthetase-like","
+NagB/RpiA/CoA transferase-like",Alpha and beta proteins,Globular proteins
+1xdz,"
+Glucose-inhibited_division_protein_B_(GidB)","
+S-adenosyl-L-methionine-dependent methyltransferases",Alpha and beta proteins,Globular proteins
+1xff,"
+Alpha_subunit_of_glutamate_synthase__GAT_domain-like","
+Class II glutamine amidotransferases",Alpha and beta proteins,Globular proteins
+1xkr,"
+CheC-like","
+CheC-like",Alpha and beta proteins,Globular proteins
+2arc,"
+AraC-like","
+RmlC-like cupins",All beta proteins,Globular proteins
+2cua,NA,NA,NA,NA
+2hs1,"
+Retroviral_protease_(retropepsin)","
+Acid proteases",All beta proteins,Globular proteins
+2mhr,"
+Hemerythrin-like","
+Hemerythrin-like",All alpha proteins,Globular proteins
+2phy,"
+PYP-like","
+PYP-like sensor domain (PAS domain)",Alpha and beta proteins,Globular proteins
+2tps,"
+Thiamin_phosphate_synthase","
+Thiamin phosphate synthase",Alpha and beta proteins,Globular proteins
+2vxn,"
+Triosephosphate_isomerase_(TIM)","
+Triosephosphate isomerase (TIM)",Alpha and beta proteins,Globular proteins
+3bor,"
+Tandem_AAA-ATPase_domain","
+RecA-like P-loop NTPases",Alpha and beta proteins,Globular proteins
+3dqg,"
+heat_shock_protein_70kd_(hsp70)__peptide-binding_domain","
+heat shock protein 70kd (hsp70)- peptide-binding domain",All beta proteins,Globular proteins
+5ptp,"
+Eukaryotic_proteases","
+Trypsin-like serine proteases",All beta proteins,Globular proteins
