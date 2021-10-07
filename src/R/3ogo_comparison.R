@@ -201,7 +201,38 @@ plot_K <- for_KR_plots2 %>%
 
 plot_K
 
-# coloring in points by experimental data (ones that were really mutated)
+# coloring in points by experimental data (ones that were really mutated):
+plot_K_mut <- for_KR_plots3 %>%
+  ggplot(aes(x = position, y = K, color = group)) +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=26.5,xmax=34.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=51.5,xmax=60.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=97.5,xmax=104.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_line() +
+  geom_point(aes(fill = mut),
+             shape = 21, 
+             size = 2) +
+  scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_fill_manual(values = c("black", "red", "yellow")) +
+  scale_x_continuous(
+    name = "Position (wt amino acid)",
+    labels = labels,
+    breaks = seq(from = 1, to = 116, by = 1),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "Probability of Lysine (K)",
+    limits = c(0, 1.0),
+    breaks = seq(from = 0.0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(color = "model", fill = "Mutations \nin lab") +
+  theme_cowplot(9) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 9),
+    panel.grid.minor = element_blank())
+
+plot_K_mut
+
+#ggsave(filename = "./analysis/figures/3ogo_lysine_muts.png", plot = plot_K_mut, width = 12, height = 4)
 
 #ggsave(filename = "./analysis/figures/3ogo_lysine.png", plot = plot_K, width = 12, height = 4)
 
@@ -234,7 +265,40 @@ plot_R <- for_KR_plots2 %>%
 
 plot_R
 
-ggsave(filename = "./analysis/figures/3ogo_arginine.png", plot = plot_R, width = 12, height = 4)
+plot_R_mut <- for_KR_plots3 %>%
+  ggplot(aes(x = position, y = R, color = group)) +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=26.5,xmax=34.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=51.5,xmax=60.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=0.0,ymax=1.0,xmin=97.5,xmax=104.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_line() +
+  geom_point(aes(fill = mut),
+             shape = 21, 
+             size = 2) +
+  scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_fill_manual(values = c("black", "red", "yellow")) +
+  scale_x_continuous(
+    name = "Position (wt amino acid)",
+    labels = labels,
+    breaks = seq(from = 1, to = 116, by = 1),
+    expand = c(0, 0)) +
+  scale_y_continuous(
+    name = "Probability of Arginine (R)",
+    limits = c(0, 1.0),
+    breaks = seq(from = 0.0, to = 1.0, by = 0.1),
+    expand = c(0, 0)) +
+  labs(color = "model", fill = "Mutations \nin lab") +
+  theme_cowplot(9) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 9),
+    panel.grid.minor = element_blank())
+
+plot_R_mut
+
+#ggsave(filename = "./analysis/figures/3ogo_arginine_muts.png", plot = plot_R_mut, width = 12, height = 4)
+
+
+#ggsave(filename = "./analysis/figures/3ogo_arginine.png", plot = plot_R, width = 12, height = 4)
 
 #=====================================================================================
 #now lets look at n-effective for both models  
@@ -273,11 +337,20 @@ labels <- c("M","Q","V","Q","L","V","E","S","G","G","A","L","V","Q","P","G","G",
 
 for_n_plot$n_eff <- as.numeric(for_n_plot$n_eff)
 
-plot_n <- for_n_plot %>%
+for_n_plot2 <- for_n_plot %>%
+  mutate(mut = map_chr(position, get_mut))
+
+plot_n <- for_n_plot2 %>%
   ggplot(aes(x = position, y = n_eff, color = group)) +
+  geom_rect(aes(ymin=1,ymax=16,xmin=26.5,xmax=34.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=1,ymax=16,xmin=51.5,xmax=60.5), fill= "#dedede", color = "#FFFFFF") +
+  geom_rect(aes(ymin=1,ymax=16,xmin=97.5,xmax=104.5), fill= "#dedede", color = "#FFFFFF") +
   geom_line() +
-  geom_point() +
+  geom_point(aes(fill = mut),
+             shape = 21, 
+             size = 2) +
   scale_color_manual(values = c("#32a852", "#9d46b8")) +
+  scale_fill_manual(values = c("black", "red", "yellow")) +
   scale_x_continuous(
     name = "Position (wt amino acid)",
     labels = labels,
@@ -297,6 +370,6 @@ plot_n <- for_n_plot %>%
 
 plot_n
 
-ggsave(filename = "./analysis/figures/3ogo_n_eff.png", plot = plot_n, width = 12, height = 4)
+ggsave(filename = "./analysis/figures/3ogo_n_eff_mut.png", plot = plot_n, width = 12, height = 4)
 
 

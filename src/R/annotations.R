@@ -147,6 +147,8 @@ struc_plot <- with_annot %>%
   scale_fill_manual(values = fills, labels = c("cnn", "transformer")) +
   scale_y_continuous(
     name = "Accuracy",
+    limits = c(0.2, 1.01),
+    breaks = seq(from = 0.2, to = 1.0, by = 0.1),
     expand = c(0, 0)
   ) +
   scale_x_discrete(
@@ -155,14 +157,17 @@ struc_plot <- with_annot %>%
   theme(
     axis.text = element_text(color = "black", size = 14),
     strip.text.x = element_text(size = 16),
-    panel.grid.major.x = element_line(color = "grey92", size=0.5),
-    panel.grid.minor.x = element_line(color = "grey92", size=0.5),
+    panel.grid.major.y = element_line(color = "grey92", size=0.5),
+    panel.grid.minor.y = element_line(color = "grey92", size=0.5),
     panel.spacing = unit(2, "lines"),
     legend.position = "right")
 
 struc_plot
 
 #ggsave(filename = paste0("./analysis/figures/structural_class_acc.png"), plot = struc_plot, width = 12, height = 6)
+
+#--------------------------------------------------------------------------------------------
+# now lets look at the proteins where one model is significantly better/worse than the other
 
 
 
