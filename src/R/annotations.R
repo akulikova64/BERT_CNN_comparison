@@ -3,6 +3,8 @@ library(cowplot)
 library(data.table)
 library(ggforce)
 library(colorspace)
+library(gridExtra)
+library(grid)
 options(scipen = 999)
 
 
@@ -81,25 +83,27 @@ means <- stats_1 %>%
 #cnn: 75.8% Accuracy
 #transformer: 71.6% accuracy
 
-stats_1 <- stats_1 %>%
-  group_by(gene) %>%
-  mutate(
-    # pick y value corresponding to y3
-    color_y = sum(freq_predict_wt * (group == "cnn")),
-    dx = rnorm(n(), mean = 0, sd = .05),
-    dy = rnorm(n(), mean = 0, sd = .05),
-    x_value = as.numeric(factor(group)))  
+with_annot1 <- left_join(stats_1, annot)
+
+for_diag1 <- with_annot1 %>%
+  select(c(gene, group, freq_predict_wt, structural_class)) %>%
+  pivot_wider(names_from = group, values_from = freq_predict_wt)
 
 for_diag <- stats_1 %>%
   select(c(gene, group, freq_predict_wt)) %>%
   pivot_wider(names_from = group, values_from = freq_predict_wt)
 
-plot <- for_diag %>%
-  ggplot(aes(x = transformer, y = cnn)) +
+#fills = c("#bf8040", "#ac5396", "#70adc2", "#748f3d", "#cc5933", "#7070c2")
+fills = c("#f51da6", "#ffbb00", "#0cba00", "#0048e3")  
+colors = c("#b00270", "bf8c00", "087500", "002d8f")
+
+plot <- for_diag1 %>%
+  na.omit() %>%
+  ggplot(aes(x = transformer, y = cnn, fill = fct_rev(structural_class), color = fct_rev(structural_class))) +
   geom_point(
     shape = 21, 
     color = "black",
-    size = 2) +
+    size = 3) +
   geom_abline(slope = 1, 
               intercept = 0,
               color = "maroon"
@@ -115,15 +119,18 @@ plot <- for_diag %>%
     limits = c(0.0, 1.01),
     breaks = seq(from = 0.0, to = 1.0, by = 0.1),
     expand = c(0, 0)) +
+  scale_fill_manual(values = fills) +
+  scale_color_manual(values = colors) +
+  labs(fill = "structural class") +
   theme_bw(16) +
   theme(
-    legend.position = "none",
+    legend.position = "right",
     axis.text = element_text(color = "black", size = 16),
     panel.grid.minor = element_blank())
 
 plot
 
-#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_diag.png"), plot = plot, width = 6, height = 6)
+#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_diag_struc.png"), plot = plot, width = 9, height = 6)
 
 
 #----------------------------------------------------------
@@ -170,8 +177,17 @@ struc_plot
 # now lets look at the proteins where one model is significantly better/worse than the other
 
 
+cnn_poor <- with_annot %>%
+  pivot_wider(names_from = group, values_from = accuracy) %>%
+  filter(cnn < 0.7 & transformer > 0.7) %>%
+  select(-c(structural_class, protein_type))
+
+trans_poor <- with_annot %>%
+  pivot_wider(names_from = group, values_from = accuracy) %>%
+  filter(transformer < 0.4 & cnn > 0.7) %>%
+  select(-c(structural_class, protein_type))
 
 
+table1 <- table(cnn_poor)
 
-
-
+#ggsave(filename = paste0("./analysis/figures/cnn_poor_table.png"), plot = table1, width = 12, height = 6)
