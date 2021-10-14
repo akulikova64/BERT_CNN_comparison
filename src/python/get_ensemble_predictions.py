@@ -85,7 +85,7 @@ def get_row(cnn_row, trans_row):
 
   # new row:
   # 'position','wt_prob','aa_wt', 'pred_prob', 'aa_pred', A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y, gene
-  row = [trans_row[2], wt_prob, trans_row[1], pred_prob] + aa_pred + [averaged_row, gene]
+  row = [trans_row[2], wt_prob, trans_row[1], pred_prob, aa_pred] + averaged_row + [gene]
 
   return row
 
@@ -116,7 +116,8 @@ with open(output_path, "w", newline='\n', encoding='utf-8') as CSV_file:
               new_row = get_row(cnn_row, trans_row)
               writer.writerow(new_row)
 
-print("Done! \n Saved output to:", output_path)
+print()
+print("Done! \nSaved output to:", output_path)
 
     
 

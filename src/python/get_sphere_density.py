@@ -68,7 +68,7 @@ def get_list(reader):
 
   return list
 
-sphere_radius = 8
+sphere_radius = 10
 
 input_path= "../../output/side_chain_centers/"
 output_path = "../../output/sphere_densities_" + str(sphere_radius) + "A.csv"
