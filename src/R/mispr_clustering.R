@@ -74,14 +74,59 @@ cnn_grouped <- joined_equal %>%
   group_by(gene, group, radius) %>%
   summarise(mean_prop = mean(prop_mispr))
 
-# get initial plot:
-plot_0 <- cnn_grouped %>%
-  ggplot(aes(x = group, y = mean_prop)) +
-  geom_violin() +
-  geom_sina() +
-  facet_wrap(vars(fct_relevel(radius, "5A", "6A", "7A", "8A", "9A", "10A")))
+stat_data_1 <- cnn_grouped %>%
+  select(-gene) %>%
+  group_by(radius, group) %>%
+  summarise(estimate = mean(mean_prop),
+            std_error = sd(mean_prop)/sqrt(length(mean_prop))) %>%
+  na.omit()
 
+cnn_grouped2 <- cnn_grouped %>%
+  group_by(radius, group) %>%
+  summarise(text_label = round(mean(mean_prop), 3)) %>%
+  mutate(mean_prop = text_label)
+
+# get proportion plot:
+plot_0 <- cnn_grouped %>%
+  ggplot(aes(x = group, y = mean_prop, fill = group, color = group)) +
+  geom_violin(alpha = 0.8) +
+  geom_sina(alpha = 0.4) +
+  geom_pointrange(data = stat_data_1, 
+                  aes(x = group,
+                      y = estimate,
+                      ymin = estimate - 1.96*std_error,
+                      ymax = estimate + 1.96*std_error),
+                  color = "black", 
+                  size = 0.7) +
+  scale_y_continuous(
+    name = "Mean proportion of mispredicted sites \nout of all local neighbors (per protein)",
+    limits = c(0.00, 0.45),
+    breaks = seq(from = 0.00, to = 0.45, by = 0.05),
+    expand = c(0, 0)) +
+  scale_x_discrete(
+    name = "",
+    labels = c("correct pred.", "mispredictions")) +
+  facet_wrap(vars(fct_relevel(radius, "5A", "6A", "7A", "8A", "9A", "10A"))) +
+  scale_fill_manual(values = c("#44b8a6", "#d94e9f"),
+                    labels = c("correct pred.", "mispred.")) +
+  scale_color_manual(values = c("#26665c", "#7d2d5c")) +
+  geom_text(data = cnn_grouped2,
+            aes(label = text_label, x = group, y = mean_prop),
+            vjust = -6,
+            hjust = 0.5,
+            color = "black",
+            position = position_dodge()) +
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        panel.grid.minor.y = element_line(color = "grey92", size=0.5),
+        legend.position = "none")
 plot_0
+
+ggsave(filename = "./analysis/figures/mean_prop_mispr.png", plot = plot_0, width = 11, height = 5)
+
+
 
 #-----------------------------------------------------
 #plotting the count of mispredictions
@@ -92,14 +137,59 @@ for_count <- joined_equal %>%
   group_by(gene, group, radius) %>%
   summarise(mean_count = mean(num_mispr))
 
-# get initial plot:
-plot_0 <- for_count %>%
-  ggplot(aes(x = group, y = mean_count)) +
-  geom_violin() +
-  geom_sina() +
-  facet_wrap(vars(fct_relevel(radius, "5A", "6A", "7A", "8A", "9A", "10A")))
+stat_data_1 <- for_count %>%
+  select(-gene) %>%
+  group_by(radius, group) %>%
+  summarise(estimate = mean(mean_count),
+            std_error = sd(mean_count)/sqrt(length(mean_count))) %>%
+  na.omit()
 
-plot_0
+for_count2 <- for_count %>%
+  group_by(radius, group) %>%
+  summarise(text_label = round(mean(mean_count), 3)) %>%
+  mutate(mean_count = text_label)
+
+# get count plot:
+plot_1 <- for_count %>%
+  ggplot(aes(x = group, y = mean_count, fill = group, color = group)) +
+  geom_violin(alpha = 0.8) +
+  geom_sina(alpha = 0.4) +
+  geom_pointrange(data = stat_data_1, 
+                  aes(x = group,
+                      y = estimate,
+                      ymin = estimate - 1.96*std_error,
+                      ymax = estimate + 1.96*std_error),
+                  color = "black", 
+                  size = 0.7) +
+  scale_y_continuous(
+    name = "Mean count of mispredicted sites \nout of all local neighbors (per protein)",
+    limits = c(0, 5),
+    breaks = seq(from = 0, to = 5, by = 1),
+    expand = c(0, 0)) +
+  scale_x_discrete(
+    name = "",
+    labels = c("correct pred.", "mispredictions")) +
+  facet_wrap(vars(fct_relevel(radius, "5A", "6A", "7A", "8A", "9A", "10A"))) +
+  scale_fill_manual(values = c("#44b8a6", "#d94e9f"),
+                    labels = c("correct pred.", "mispred.")) +
+  scale_color_manual(values = c("#26665c", "#7d2d5c")) +
+  geom_text(data = for_count2,
+            aes(label = text_label, x = group, y = mean_count),
+            vjust = -6,
+            hjust = 0.5,
+            color = "black",
+            position = position_dodge()) +
+  theme_cowplot(16) +
+  theme(plot.title = element_text(hjust = 0, size = 16),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey92", size=0.5),
+        panel.grid.minor.y = element_line(color = "grey92", size=0.5),
+        legend.position = "none")
+
+plot_1
+
+ggsave(filename = "./analysis/figures/mean_count_mispr.png", plot = plot_1, width = 11, height = 5)
+
 
 #---------------------------------------------------------------------------------
 #try doing binary (does it have at least one mispredicted neighbor or does it not)
@@ -123,20 +213,23 @@ plot <- cnn_binary %>%
   ggplot(aes(x = fct_relevel(radius, "5A", "6A", "7A", "8A", "9A", "10A"), y = mean_per_proteins, fill = group)) +
   geom_col(position = position_dodge()) +
   scale_y_continuous(
-    name = "Mean number of residues that \nhave at least one mispredicted site",
+    name = "Mean number of residues per protein that \nhave at least one mispredicted site",
     limits = c(0, 32),
     breaks = seq(from = 0, to = 32, by = 2),
     expand = c(0, 0)) +
-  labs(fill = "focal residue") +
+  labs(fill = "Focal residue") +
   scale_x_discrete(
     name = "Radius") +
-  scale_fill_manual(values = c("#44b8a6", "#d94e9f")) +
+  scale_fill_manual(values = c("#44b8a6", "#d94e9f"),
+                    labels = c("correct pred.", "mispred.")) +
   theme_cowplot(16) +
   theme(plot.title = element_text(hjust = 0, size = 16),
         plot.subtitle = element_text(hjust = 0.5),
         panel.grid.major.y = element_line(color = "grey92", size=0.5),
         legend.position = "right")
 plot
+
+ggsave(filename = "./analysis/figures/at_least_one_neighbor.png", plot = plot, width = 11, height = 5)
 
 
 
