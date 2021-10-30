@@ -90,13 +90,10 @@ def get_model(GPUS = 1):
   """ model with one dense layer """
 
   model = Sequential()
-  model.add(Dense(1000, activation = 'relu')) # 500 nodes in the last hidden layer
+  model.add(Dense(200, activation = 'relu')) # 500 nodes in the last hidden layer
   model.add(Dense(20, activation = 'softmax')) # output layer has 20 possible classes (amino acids 0 - 19)
 
   return model
-
-def timestamp():
-  return str(datetime.now().time())
 
 def get_history(model_id, output_path):
   """ parces the history CSV file """ 
@@ -219,7 +216,6 @@ run = get_current_run(model_id, output_path)
 ### setting parameters for training
 loss ='categorical_crossentropy'
 optimizer = Adam(lr = learning_rate)
-metrics = ['accuracy']
 metrics = ['accuracy']
 
 #========================================================================================================

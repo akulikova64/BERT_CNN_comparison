@@ -10,6 +10,9 @@ options(scipen = 999)
 
 # do the mispredictions cluster in proteins for both the cnn and trans?
 
+cnn_3A <- read.csv(file = "./output/sphere_densities_3A.csv", header=TRUE, sep=",")
+cnn_4A <- read.csv(file = "./output/sphere_densities_4A.csv", header=TRUE, sep=",")
+
 cnn_5A <- read.csv(file = "./output/sphere_densities_5A.csv", header=TRUE, sep=",")
 cnn_6A <- read.csv(file = "./output/sphere_densities_6A.csv", header=TRUE, sep=",")
 cnn_7A <- read.csv(file = "./output/sphere_densities_7A.csv", header=TRUE, sep=",")
