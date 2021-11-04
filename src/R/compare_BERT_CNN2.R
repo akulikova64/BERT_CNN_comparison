@@ -12,6 +12,8 @@ cnn_data_all <- read.csv(file = "./output/cnn_wt_max_freq.csv", header=TRUE, sep
 
 align_data <- read.csv(file = "./output/stats_align_all.csv", header=TRUE, sep=",")
 
+trans_data_esm <- read.csv(file = "./output/PSICOV_ESM1b_predictions.csv", header=TRUE, sep=",")
+
 #clean cnn data:
 
 cnn_data <- cnn_data_all %>%
@@ -30,7 +32,7 @@ cnn_data <- cnn_data_all %>%
 
 #clean trans data:
 
-transf_data <- trans_data %>%
+transf_data <- trans_data_esm %>% # choose which transformer model to use here
   mutate(pred_prob = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
   pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
   mutate(aa_pred = ifelse(pred_prob == freq, aa, NA)) %>%
@@ -480,8 +482,8 @@ trans_hist <- for_2D_hist %>%
     expand = c(0, 0)) +
   scale_y_continuous(
     name = "Transformer confidence",
-    limits = c(0.0, 1.0),
-    breaks = seq(0.0, 1.0, by = 0.1),
+    limits = c(0.1, 1.0),
+    breaks = seq(0.2, 1.0, by = 0.2),
     expand = c(0, 0)) + 
   scale_fill_binned_sequential(palette = "Teal", limits = c(0, 50)) +
   theme_cowplot(16) +
@@ -516,8 +518,8 @@ cnn_hist <- for_2D_hist %>%
     expand = c(0, 0)) +
   scale_y_continuous(
     name = "CNN confidence",
-    limits = c(0.0, 1.0),
-    breaks = seq(0.0, 1.0, by = 0.1),
+    limits = c(0.1, 1.0),
+    breaks = seq(0.2, 1.0, by = 0.2),
     expand = c(0, 0)) + 
   scale_fill_binned_sequential(palette = "Teal", limits = c(0, 50)) +
   theme_cowplot(16) +
@@ -542,7 +544,7 @@ prow <- plot_grid(trans_hist, cnn_hist, nrow = 1, align = "h", labels = c('a', '
 figure2 <- plot_grid(prow, legend, ncol = 2, rel_widths = c(1, .1))
 figure2
 
-ggsave(filename = "./analysis/figures/trans_cnn_RSA.png", plot = figure2, width = 10, height = 4.5)
+ggsave(filename = "./analysis/figures/trans_cnn_RSA2.png", plot = figure2, width = 10, height = 4.5)
 
 
 ggsave(filename = paste("./analysis/figures/cnn_conf_vs_SA_150.png"), plot = plot_2D_hist, width = 8, height = 6)

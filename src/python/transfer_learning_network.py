@@ -11,6 +11,7 @@ import csv
 import sys
 import re
 import os
+import logging
 
 #try:
 import keras
@@ -39,11 +40,11 @@ except ImportError:
 def timestamp():
   return str(datetime.now().time())
 
+
 def get_current_run(model_id, output_path):
   """ checks output folder for the previous run number and adds one """
 
-  path = output_path + "/"
-  fileList = os.listdir(path)
+  fileList = os.listdir(output_path)
 
   current_run = 1
   for file in fileList:
@@ -57,7 +58,7 @@ def get_current_run(model_id, output_path):
 
   return current_run
 
-def compile_model(run, loss, optimizer, metrics, output_path):
+def compile_model(model_id, run, loss, optimizer, metrics, output_path):
   """ loads previous model or compiles a new model """
 
   last_model = output_path + "/model_" + model_id + "_run_" + str(run-1) + ".h5"
@@ -77,11 +78,11 @@ def load_data(training_path, validation_path):
   """ loads training and validation data """
 
   print("\nStarting to load training data:", timestamp())
-  x_train = np.load(training_path + "nn_data_train.npy", allow_pickle = True).tolist()
-  y_train = np.load(training_path + "answers_train.npy", allow_pickle = True).tolist()
+  x_train = np.load(training_path + "nn_data_train.npy", allow_pickle = True)
+  y_train = np.load(training_path + "answers_train.npy", allow_pickle = True)
   print("Finished loading training data:", timestamp())
-  x_val = np.load(validation_path + "nn_data_val.npy", allow_pickle = True).tolist()
-  y_val = np.load(validation_path + "answers_val.npy", allow_pickle = True).tolist()
+  x_val = np.load(validation_path + "nn_data_val.npy", allow_pickle = True)
+  y_val = np.load(validation_path + "answers_val.npy", allow_pickle = True)
   print("Finished loading validation data:", timestamp())
 
   return x_train, y_train, x_val, y_val
@@ -90,17 +91,26 @@ def get_model(GPUS = 1):
   """ model with one dense layer """
 
   model = Sequential()
-  model.add(Dense(200, activation = 'relu')) # 500 nodes in the last hidden layer
+  model.add(Dense(150, activation = 'relu')) # hidden layer
   model.add(Dense(20, activation = 'softmax')) # output layer has 20 possible classes (amino acids 0 - 19)
 
   return model
+
+def save_csv_logger(model_id, output_path):
+  """ saves epoch history as CSV file """
+
+  csv_logger_path = output_path + "model_" + model_id + "_history_log.csv"
+  csv_logger = CSVLogger(csv_logger_path, append = True)
+  print("History CSV file loaded and ready, starting to train:", timestamp(), "\n")
+
+  return csv_logger
 
 def get_history(model_id, output_path):
   """ parces the history CSV file """ 
 
   accuracy, loss, val_accuracy, val_loss = [], [], [], []
 
-  with open(output_path + "/model_" + str(model_id) + "_history_log.csv") as hist_file:
+  with open(output_path + "model_" + str(model_id) + "_history_log.csv") as hist_file:
     csv_reader = csv.DictReader(hist_file, delimiter=',')
     for row_values in csv_reader:
       accuracy.append(float(row_values['accuracy']))
@@ -110,16 +120,13 @@ def get_history(model_id, output_path):
   
   return accuracy, loss, val_accuracy, val_loss
 
-def get_plots(run, model_id, BLUR, loss, optimizer, learning_rate, data, output_path, rotations):
+def get_plots(run, model_id, loss, optimizer, learning_rate, output_path):
   """ creates simple plots of accuracy and loss for training and validation """
 
-  parameter_text = "BLUR = " + str(BLUR) + "\n" + \
-                   "loss = " + str(loss) + "\n" \
+  parameter_text = "loss = " + str(loss) + "\n" \
                    "optimizer = " + str(optimizer)[18:28] + ". \n" \
                    "learning rate = " + str(learning_rate) + "\n" \
-                   "training data = " + str(data) + "\n" \
-                   "rotations = " + str(rotations) 
-
+    
   timestr = time.strftime("%m%d-%H%M%S")
 
   accuracy, loss, val_accuracy, val_loss = get_history(model_id, output_path)
@@ -134,7 +141,7 @@ def get_plots(run, model_id, BLUR, loss, optimizer, learning_rate, data, output_
   plt.ylabel('accuracy')
   plt.xlabel('epoch')
   plt.legend(['training', 'validation'], loc = 'upper left')
-  plt.annotate(parameter_text, xy = (0.28, 0.84), xycoords = 'axes fraction', size = 7) 
+  plt.annotate(parameter_text, xy = (0.28, 0.45), xycoords = 'axes fraction', size = 7) 
   plt.savefig(output_path + "/Accuracy_model_" + model_id + "_run_" + str(run) + "_" + timestr + ".pdf")
   plt.clf()
 
@@ -146,7 +153,7 @@ def get_plots(run, model_id, BLUR, loss, optimizer, learning_rate, data, output_
   plt.ylabel('loss')
   plt.xlabel('epoch')
   plt.legend(['training', 'validaton'], loc = 'upper left')
-  plt.annotate(parameter_text, xy = (0.28, 0.84), xycoords = 'axes fraction', size = 7)
+  plt.annotate(parameter_text, xy = (0.28, 0.45), xycoords = 'axes fraction', size = 7)
   plt.savefig(output_path + "/loss_model_" + model_id + "_run_" + str(run) + "_" + timestr + ".pdf")
 
   #saving all data in a CSV file
@@ -154,9 +161,9 @@ def get_plots(run, model_id, BLUR, loss, optimizer, learning_rate, data, output_
   print("Starting to write CSV file:", timestamp())
   with open(path, 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["Model_ID", "Epoch", "BLUR", "learning_rate", "rotations", "Acc_train", "Acc_val", "Loss_train", "Loss_val"])
+    writer.writerow(["Model_ID", "Epoch", "learning_rate", "Acc_train", "Acc_val", "Loss_train", "Loss_val"])
     for i in range(0, len(accuracy)):
-      writer.writerow([model_id, i+1, BLUR, learning_rate, rotations, accuracy[i], val_accuracy[i], loss[i], val_loss[i]])
+      writer.writerow([model_id, i+1, learning_rate, accuracy[i], val_accuracy[i], loss[i], val_loss[i]])
   print("Finished writing CSV file:", timestamp())
 
 def save_model(model, model_id, run, output_path):
@@ -167,8 +174,10 @@ def save_model(model, model_id, run, output_path):
   print("Saved current model:", timestamp(), "\n")
 
 # training and saving the model
-def train_model(model, run, epochs, x_train, y_train, x_val, y_val, output_path):
+def train_model(model, model_id, run, epochs, x_train, y_train, x_val, y_val, output_path):
   """ calling the model to train """
+
+  csv_logger = save_csv_logger(model_id, output_path)
 
   print("Starting to train:", timestamp(), "\n")
   
@@ -177,13 +186,15 @@ def train_model(model, run, epochs, x_train, y_train, x_val, y_val, output_path)
       y = y_train,
       validation_data = (x_val, y_val),
       epochs = epochs, 
-      verbose = 1)
+      verbose = 1,
+      callbacks = [csv_logger])
 
   print("Finished training and validation:", timestamp(), "\n")
   
   save_model(model, model_id, run, output_path)
+  
   print("Saved model:", timestamp(), "\n")
-  print(model.summary(), "\n")
+  #print(model.summary(), "\n")
 
 
 def get_val_predictions(model, model_id, run, x_val, output_path):
@@ -196,22 +207,24 @@ def get_val_predictions(model, model_id, run, x_val, output_path):
   print("Finished predicting:", timestamp(), "\n")
 
 
-
-
 #========================================================================================================
 # Setting the variables, parameters and data paths/locations:
 #========================================================================================================
+
+#try:
+
 ### data paths/locations
-training_path = "../../data/transfer_learning_net/input/training/"
-validation_path = "../../data/transfer_learning_net/input/validation/"
-output_path = "../../data/transfer_learning_net/output/training_results/"
+training_path = "../../data/transfer_learning_net/training/"
+validation_path = "../../data/transfer_learning_net/validation/"
+output_path = "../../data/transfer_learning_net/network_output/"
 
 ### variables
-EPOCHS = 2 # iterations through the data
+EPOCHS = 200 # iterations through the data
 
-model_id = "1"
+model_id = "6"
 learning_rate = 0.0001
-run = get_current_run(model_id, output_path)
+#run = get_current_run(model_id, output_path)
+run = 1
 
 ### setting parameters for training
 loss ='categorical_crossentropy'
@@ -235,6 +248,13 @@ train_model(model, model_id, run, EPOCHS, x_train, y_train, x_val, y_val, output
 get_val_predictions(model, model_id, run, x_val, output_path)
 
 ### results
-get_plots(run, model_id, loss, optimizer, learning_rate, training_path[3:-1], output_path)
+get_plots(run, model_id, loss, optimizer, learning_rate, output_path)
 
 print("Training completed!")
+
+'''
+except Exception as Argument:
+  file = open("trans_learn_error.txt", "w")
+  file.write(str(Argument))
+  file.close()
+'''
