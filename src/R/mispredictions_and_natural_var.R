@@ -227,8 +227,10 @@ plot_nat_conf <- joined_final %>%
   geom_violin(alpha = 0.6, 
               size = 0.4, 
               bw = 0.02, 
-              position = position_dodge(width = 0.6),
-              scale = "width") + 
+              position = position_dodge(width = 0.75),
+              width = 2,
+              #scale = "width"
+              ) + 
   geom_pointrange(data = joined_stats, aes(x = pred_bin,
                                         y = estimate,
                                         ymin = estimate - 1.96*std_error,
@@ -236,7 +238,7 @@ plot_nat_conf <- joined_final %>%
                   color = "black", 
                   alpha = 0.7, 
                   size = 0.4,
-                  position = position_dodge(width = 0.6)) +
+                  position = position_dodge(width = 0.75)) +
   #stat_summary(fun.data=data_summary, color = "black", alpha = 0.7) +
   theme_cowplot(14) + 
   theme(plot.title = element_text(hjust = 0, size = 14), 
@@ -261,4 +263,4 @@ plot_nat_conf
 #ggsave(filename = "./analysis/figures/std_error.png", plot = plot_nat_conf, width = 8, height = 5)
 
 
-ggsave(filename = "./analysis/figures/nat_freq_vs_pred_bert_esm.png", plot = plot_nat_conf, width = 8.5, height = 4.5)
+ggsave(filename = "./analysis/figures/nat_freq_vs_pred_bert_esm.png", plot = plot_nat_conf, width = 8, height = 4)

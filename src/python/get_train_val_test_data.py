@@ -135,30 +135,35 @@ def answers_matching(answers_cnn, answers_trans):
       return True
 '''
 
-def get_combined_data(cnn_probs, trans_probs):
+def get_combined_data(cnn_probs, bert_probs, esm_probs):
 
   combined_data = []
   answers = []
 
   for gene_cnn in cnn_probs:
-    for gene_trans in trans_probs:
-      if gene_cnn == gene_trans:
-        gene = gene_cnn
-        cnn_data, trans_data = cnn_probs[gene], trans_probs[gene]
+    for gene_bert in bert_probs:
+      for gene_esm in esm_probs:
+        if gene_cnn == gene_bert and gene_cnn == gene_esm:
+          gene = gene_cnn
+          cnn_data, bert_data, esm_data = cnn_probs[gene], bert_probs[gene], esm_probs[gene]
 
-        for cnn_pos_wt, cnn_vector in zip(cnn_data.keys(), cnn_data.values()):
-          cnn_pos = int(cnn_pos_wt[0])
-          cnn_wt = cnn_pos_wt[1]
-          for trans_pos_wt, trans_vector in zip(trans_data.keys(), trans_data.values()):
-            trans_pos = int(trans_pos_wt[0])
-            trans_wt = trans_pos_wt[1]
+          for cnn_pos_wt, cnn_vector in zip(cnn_data.keys(), cnn_data.values()):
+            cnn_pos = int(cnn_pos_wt[0])
+            cnn_wt = cnn_pos_wt[1]
+            for bert_pos_wt, bert_vector in zip(bert_data.keys(), bert_data.values()):
+              bert_pos = int(bert_pos_wt[0])
+              bert_wt = bert_pos_wt[1]
+              for esm_pos_wt, esm_vector in zip(esm_data.keys(), esm_data.values()):
+                esm_pos = int(esm_pos_wt[0])
+                esm_wt = esm_pos_wt[1]
 
-            if cnn_pos == trans_pos and cnn_wt == trans_wt:
-              combined_vector = cnn_vector + trans_vector
-              combined_data.append(combined_vector)
+                if cnn_pos == bert_pos and  cnn_pos == esm_pos and \
+                  cnn_wt == bert_wt and cnn_wt == esm_wt: # checking that the position and wt match.
+                  combined_vector = cnn_vector + bert_vector + esm_vector
+                  combined_data.append(combined_vector)
 
-              answer_vector = get_answer(cnn_wt)
-              answers.append(answer_vector)
+                  answer_vector = get_answer(cnn_wt)
+                  answers.append(answer_vector)
      
   return combined_data, answers
 
@@ -186,7 +191,8 @@ def split_data(probs, SPLIT):
 
 # data paths
 cnn_pred = "../../output/PSICOV_CNN_output/"
-trans_pred = "../../output/PSICOV_BERT_predictions.csv"
+bert_pred = "../../output/PSICOV_BERT_predictions.csv"
+esm_pred = "../../output/PSICOV_ESM1b_predictions.csv"
 
 train_path = "../../data/transfer_learning_net/training/"
 val_path = "../../data/transfer_learning_net/validation/"
@@ -198,10 +204,11 @@ SPLIT = [0.8, 0.2, 0]
 
 # extract the probabilities and wt (answers) from raw files for both models:
 cnn_probs = get_cnn_probs(cnn_pred)
-trans_probs  = get_trans_probs(trans_pred)
+bert_probs  = get_trans_probs(bert_pred)
+esm_probs  = get_trans_probs(esm_pred)
 
 # combine probabilities into one vector for each position:
-combined_data, answers = get_combined_data(cnn_probs, trans_probs)
+combined_data, answers = get_combined_data(cnn_probs, bert_probs, esm_probs)
 
 # split data into training, validation and testing
 training, validation, testing = split_data(combined_data, SPLIT)
@@ -215,16 +222,16 @@ assert len(testing) == len(test_answers)
 
 # saving data as numpy arrays:
 # training
-np.save(train_path + "nn_data_train.npy", training, allow_pickle = True)
-np.save(train_path + "answers_train.npy", train_answers, allow_pickle = True)
+np.save(train_path + "nn_data_train_combo3.npy", training, allow_pickle = True)
+np.save(train_path + "answers_train_combo3.npy", train_answers, allow_pickle = True)
 
 # validation
-np.save(val_path + "nn_data_val.npy", validation, allow_pickle = True)
-np.save(val_path + "answers_val.npy", val_answers, allow_pickle = True)
+np.save(val_path + "nn_data_val_combo3.npy", validation, allow_pickle = True)
+np.save(val_path + "answers_val_combo3.npy", val_answers, allow_pickle = True)
 
 # testing
-np.save(test_path + "nn_data_test.npy", testing, allow_pickle = True)
-np.save(test_path + "answers_test.npy", test_answers, allow_pickle = True)
+np.save(test_path + "nn_data_test_combo3.npy", testing, allow_pickle = True)
+np.save(test_path + "answers_test_combo3.npy", test_answers, allow_pickle = True)
 
 print()
 print("Finished saving data!")

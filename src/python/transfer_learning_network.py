@@ -78,11 +78,11 @@ def load_data(training_path, validation_path):
   """ loads training and validation data """
 
   print("\nStarting to load training data:", timestamp())
-  x_train = np.load(training_path + "nn_data_train.npy", allow_pickle = True)
-  y_train = np.load(training_path + "answers_train.npy", allow_pickle = True)
+  x_train = np.load(training_path + "nn_data_train_combo3.npy", allow_pickle = True)
+  y_train = np.load(training_path + "answers_train_combo3.npy", allow_pickle = True)
   print("Finished loading training data:", timestamp())
-  x_val = np.load(validation_path + "nn_data_val.npy", allow_pickle = True)
-  y_val = np.load(validation_path + "answers_val.npy", allow_pickle = True)
+  x_val = np.load(validation_path + "nn_data_val_combo3.npy", allow_pickle = True)
+  y_val = np.load(validation_path + "answers_val_combo3.npy", allow_pickle = True)
   print("Finished loading validation data:", timestamp())
 
   return x_train, y_train, x_val, y_val
@@ -91,7 +91,8 @@ def get_model(GPUS = 1):
   """ model with one dense layer """
 
   model = Sequential()
-  model.add(Dense(150, activation = 'relu')) # hidden layer
+  model.add(Dense(120, activation = 'relu')) # hidden layer
+  model.add(Dense(60, activation = 'relu')) # hidden layer
   model.add(Dense(20, activation = 'softmax')) # output layer has 20 possible classes (amino acids 0 - 19)
 
   return model
@@ -221,7 +222,7 @@ output_path = "../../data/transfer_learning_net/network_output/"
 ### variables
 EPOCHS = 200 # iterations through the data
 
-model_id = "6"
+model_id = "combo3_120_60" # remember to change training data file name if you no longer need combo3 data
 learning_rate = 0.0001
 #run = get_current_run(model_id, output_path)
 run = 1

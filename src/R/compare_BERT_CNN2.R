@@ -12,8 +12,6 @@ cnn_data_all <- read.csv(file = "./output/cnn_wt_max_freq.csv", header=TRUE, sep
 
 align_data <- read.csv(file = "./output/stats_align_all.csv", header=TRUE, sep=",")
 
-trans_data_esm <- read.csv(file = "./output/PSICOV_ESM1b_predictions.csv", header=TRUE, sep=",")
-
 #clean cnn data:
 
 cnn_data <- cnn_data_all %>%
@@ -32,7 +30,7 @@ cnn_data <- cnn_data_all %>%
 
 #clean trans data:
 
-transf_data <- trans_data_esm %>% # choose which transformer model to use here
+transf_data <- trans_data %>%
   mutate(pred_prob = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
   pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
   mutate(aa_pred = ifelse(pred_prob == freq, aa, NA)) %>%
@@ -82,8 +80,7 @@ means <- stats_1 %>%
   group_by(group) %>%
   summarise(mean = mean(freq_predict_wt))
 #cnn: 75.8% Accuracy
-# BERT transformer: 71.6% accuracy
-# ESM1b transformer: 60.58% accuracy
+#transformer: 71.6% accuracy
 
 stats_1 <- stats_1 %>%
   group_by(gene) %>%
@@ -107,7 +104,7 @@ plot <- stats_1 %>%
   scale_x_continuous(
     name = "Neural Network",
     limits = c(0.7,2.3),
-    labels = c("CNN", "ESM1b \nTransformer"),
+    labels = c("CNN", "Transformer"),
     breaks = (seq(from = 1.0, to = 2.0, by = 1))
     ) +
   scale_y_continuous(
@@ -127,155 +124,10 @@ plot <- stats_1 %>%
 
 plot
 
-#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_150_esm1b.png"), plot = plot, width = 6, height = 6)
+#ggsave(filename = paste0("./analysis/figures/accuracy_cnn_bert_150.png"), plot = plot, width = 6, height = 6)
 
-#------------------------------------------------------------------------------------
-# now lets combine the two transformers and compare them to each other. 
-transf_esm <- trans_data_esm %>% # choose which transformer model to use here
-  mutate(pred_prob = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
-  pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
-  mutate(aa_pred = ifelse(pred_prob == freq, aa, NA)) %>%
-  na.omit() %>%
-  select(-c(aa, freq, row)) %>%
-  rename(freq_pred_esm = pred_prob,
-         freq_wt_esm = wt_prob,
-         aa_wt_esm = aa_wt,
-         aa_pred_esm = aa_pred)
-
-transf_bert <- trans_data %>% # choose which transformer model to use here
-  mutate(pred_prob = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
-  pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
-  mutate(aa_pred = ifelse(pred_prob == freq, aa, NA)) %>%
-  na.omit() %>%
-  select(-c(aa, freq, row)) %>%
-  rename(freq_pred_bert = pred_prob,
-         freq_wt_bert = wt_prob,
-         aa_wt_bert = aa_wt,
-         aa_pred_bert = aa_pred)
-
-joined_data <- inner_join(transf_bert, transf_esm)
-
-# clean cnn data:
-esm_data_unjoined <- joined_data %>%
-  select(-c(aa_wt_bert, aa_pred_bert, freq_wt_bert, freq_pred_bert)) %>%
-  rename(freq_pred = freq_pred_esm,
-         aa_pred = aa_pred_esm,
-         freq_wt = freq_wt_esm,
-         aa_wt = aa_wt_esm) %>%
-  mutate(group = "ESM1b")
-
-# clean tranformer data:
-
-bert_data_unjoined <- joined_data %>%
-  select(-c(aa_wt_esm, aa_pred_esm, freq_wt_esm, freq_pred_esm)) %>%
-  rename(freq_pred = freq_pred_bert,
-         aa_pred = aa_pred_bert,
-         freq_wt = freq_wt_bert,
-         aa_wt = aa_wt_bert) %>%
-  mutate(group = "BERT")
-
-# now bind rows:
-
-joined2 <- rbind(bert_data_unjoined, esm_data_unjoined)
-
-
-match_wt <- joined2 %>%
-  mutate(match_predict_wt = aa_pred == aa_wt)
-
-#data entries where the predicted amino acid matches the wt
-stats_1 <- match_wt %>%
-  group_by(gene, group) %>%
-  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)),
-            mean_conf = mean(freq_pred))
-
-means <- stats_1 %>%
-  group_by(group) %>%
-  summarise(mean = mean(freq_predict_wt))
-# BERT transformer: 68.3% accuracy
-# ESM1b transformer: 60.7% accuracy
-
-stats_1 <- stats_1 %>%
-  group_by(gene) %>%
-  mutate(
-    # pick y value corresponding to y3
-    color_y = sum(freq_predict_wt * (group == "BERT")),
-    dx = rnorm(n(), mean = 0, sd = .05),
-    dy = rnorm(n(), mean = 0, sd = .05),
-    x_value = as.numeric(factor(group)))  
-
-
-combined_plot <- stats_1 %>%
-  ggplot(aes(x = group, y = freq_predict_wt)) +
-  geom_path(
-    aes(x = as.numeric(factor(group))+dx, y = freq_predict_wt+dy, group = gene, color = color_y),
-    size = 0.25) +
-  geom_point(
-    aes(x = as.numeric(factor(group))+dx, y = freq_predict_wt+dy, group = gene, fill = color_y),
-    shape = 21, 
-    color = "black",
-    size = 2) +
-  scale_x_continuous(
-    name = "Neural Network",
-    limits = c(0.7,2.3),
-    labels = c("BERT \nTransformer", "ESM1b \nTransformer"),
-    breaks = (seq(from = 1.0, to = 2.0, by = 1))
-  ) +
-  scale_y_continuous(
-    name = "Accuracy",
-    limits = c(0.1, 1.0),
-    breaks = seq(from = 0.1, to = 1.0, by = 0.1),
-    expand = c(0, 0)) +
-  scale_color_gradient(
-    aesthetics = c("color", "fill"), 
-    high = "#ffd966", 
-    low = "#000066") +
-  theme_bw(16) +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(color = "black", size = 16),
-    panel.grid.minor = element_blank())
-
-combined_plot
-
-ggsave(filename = paste0("./analysis/figures/accuracy_bert_esm1b.png"), plot = combined_plot, width = 6, height = 6)
-
-#lets plot BERT accuracy vs ESM1b accuracy. I suspect they are not correlated.
-
-wider_stats <- stats_1 %>%
-  select(c(group, freq_predict_wt)) %>%
-  pivot_wider(names_from = group, values_from = freq_predict_wt)
-
-cor_plot <- wider_stats %>%
-  ggplot(aes(y = BERT, x = ESM1b)) +
-  geom_point(
-    shape = 21, 
-    color = "black",
-    size = 3) +
-  geom_abline(slope = 1, 
-              intercept = 0,
-              color = "maroon"
-  ) +
-  scale_x_continuous(
-    name = "ESM1b Transformer \nAccuracy",
-    limits = c(0.0, 1.01),
-    breaks = (seq(from = 0.0, to = 1.0, by = 0.1)),
-    expand = c(0, 0)
-  ) +
-  scale_y_continuous(
-    name = "BERT Transformer \nAccuracy",
-    limits = c(0.0, 1.01),
-    breaks = seq(from = 0.0, to = 1.0, by = 0.1),
-    expand = c(0, 0)) +
-  theme_bw(16) +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(color = "black", size = 16),
-    panel.grid.minor = element_blank())
-
-cor_plot
-
-ggsave(filename = paste0("./analysis/figures/accuracy_esm1b_bert_diag.png"), plot = cor_plot, width = 7, height = 7)
-
+diagonal <- stats_1 %>%
+ select(c())
 
 #==========================================================================
 # lets bin the transofmer predicted proteins by accuracy and plot CNN conf
@@ -628,8 +480,8 @@ trans_hist <- for_2D_hist %>%
     expand = c(0, 0)) +
   scale_y_continuous(
     name = "Transformer confidence",
-    limits = c(0.1, 1.0),
-    breaks = seq(0.2, 1.0, by = 0.2),
+    limits = c(0.0, 1.0),
+    breaks = seq(0.0, 1.0, by = 0.1),
     expand = c(0, 0)) + 
   scale_fill_binned_sequential(palette = "Teal", limits = c(0, 50)) +
   theme_cowplot(16) +
@@ -664,8 +516,8 @@ cnn_hist <- for_2D_hist %>%
     expand = c(0, 0)) +
   scale_y_continuous(
     name = "CNN confidence",
-    limits = c(0.1, 1.0),
-    breaks = seq(0.2, 1.0, by = 0.2),
+    limits = c(0.0, 1.0),
+    breaks = seq(0.0, 1.0, by = 0.1),
     expand = c(0, 0)) + 
   scale_fill_binned_sequential(palette = "Teal", limits = c(0, 50)) +
   theme_cowplot(16) +
@@ -690,7 +542,7 @@ prow <- plot_grid(trans_hist, cnn_hist, nrow = 1, align = "h", labels = c('a', '
 figure2 <- plot_grid(prow, legend, ncol = 2, rel_widths = c(1, .1))
 figure2
 
-ggsave(filename = "./analysis/figures/trans_cnn_RSA2.png", plot = figure2, width = 10, height = 4.5)
+ggsave(filename = "./analysis/figures/trans_cnn_RSA.png", plot = figure2, width = 10, height = 4.5)
 
 
 ggsave(filename = paste("./analysis/figures/cnn_conf_vs_SA_150.png"), plot = plot_2D_hist, width = 8, height = 6)
@@ -795,7 +647,7 @@ get_neff <- function(freq_list) {
 }
 
 # lets find n-eff for the transformer data:
-trans_data2 <- trans_data_esm %>%
+trans_data2 <- trans_data %>%
   select(c(gene, position, A:Y)) %>%
   nest(data = c(A:Y)) %>%
   mutate(n_eff_tranf = map(data, get_neff)) %>%
@@ -857,13 +709,13 @@ plot_cor <- data_cor %>%
     #name = "Neural Network",
     name = "",
     limits = c(0.7,2.3),
-    labels = c("CNN \n (structure)", "ESM1b \nTransformer \n(sequence)"),
+    labels = c("CNN \n (structure)", "Transformer \n (sequence)"),
     breaks = (seq(from = 1.0, to = 2.0, by = 1))
   ) +
   scale_y_continuous(
     name = "Correlation Coefficients",
     limits = c(-0.3, 0.9),
-    breaks = seq(from = -0.3, to = 0.9, by = 0.2),
+    breaks = seq(from = 0.0, to = 0.9, by = 0.1),
     expand = c(0, 0)) +
   scale_color_gradient(
     aesthetics = c("color", "fill"), 
@@ -877,7 +729,7 @@ plot_cor <- data_cor %>%
 
 plot_cor
 
-ggsave(filename = paste0("./analysis/figures/neff_cor_cnn_esm1b_150.png"), plot = plot_cor, width = 6, height = 6)
+ggsave(filename = paste0("./analysis/figures/neff_cor_cnn_bert_150.png"), plot = plot_cor, width = 6, height = 6)
 
 
 #lets get mean correlations:
@@ -885,8 +737,8 @@ means_cor <- data_cor %>%
   select(c(gene, cor, group)) %>%
   group_by(group) %>%
   summarise(mean = mean(cor))
-#CNN mean cor: 0.26
-#transformer mean cor: 0.47
+#CNN mean cor: 0.325
+#transformer mean cor: 0.404
 
 
 

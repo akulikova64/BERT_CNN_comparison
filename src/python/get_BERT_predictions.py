@@ -8,8 +8,9 @@ from berteome import esm1b
 
 # this script takes in a fasta file of sequences and runds every sequence through the BERT transformer model. 
 
-input_path = "../../data/PSICOV_seqs.fasta"
-output_path = "../../output/PSICOV_ESM1b_predictions.csv"
+#input_path = "../../data/PSICOV_seqs.fasta"
+input_path = "../../data/nanobody_seqs.fasta"
+output_path = "../../output/nanobody_predictions_esm1b.csv"
 
 
 with open(output_path, "w", newline='\n', encoding='utf-8') as CSV_file:
