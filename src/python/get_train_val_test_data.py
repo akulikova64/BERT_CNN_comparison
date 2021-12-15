@@ -18,7 +18,7 @@ def get_cnn_probs(cnn_pred):
 
     #remove header 
     for i in range(len(lines)):
-      lines[i] = lines[i].split(",")
+      lines[i] = lines[i].split(",") #split elements of each row with ","
     header = lines[0] 
     del lines[0]
     
@@ -78,7 +78,7 @@ def get_trans_probs(trans_pred):
       gene = line[24]
       trans_probs = line[4:24]
       wt_aa = line[1]
-      position = line[2]
+      position = int(line[2])
 
       if gene not in trans_probs_all:
         trans_probs_all[gene] = dict()
@@ -167,6 +167,42 @@ def get_combined_data(cnn_probs, bert_probs, esm_probs):
      
   return combined_data, answers
 
+def get_combined_data_2(cnn_probs, bert_probs, esm_probs):
+
+  combined_data = []
+  answers = []
+  exceptions = dict()
+
+  '''
+  for cnn_key, bert_key, esm_key in zip(cnn_probs['1pko'], bert_probs['1pko'], esm_probs['1pko']):
+    print(cnn_key, bert_key, esm_key)
+  sys.exit()'''
+
+  for gene in bert_probs:
+    for pos_wt in bert_probs[gene]:
+      try: # making sure all vectors have same gene, position and wt_aa:
+        bert_vector = bert_probs[gene][pos_wt]
+        esm_vector = esm_probs[gene][pos_wt]
+        cnn_vector = cnn_probs[gene][pos_wt]
+      except:
+        if gene not in exceptions:
+          exceptions[gene] = 1
+        elif gene in exceptions:
+          exceptions[gene] += 1
+        continue
+
+      # combining synchronied vectors into one:
+      combined_vector = cnn_vector + bert_vector + esm_vector
+      combined_data.append(combined_vector)
+
+      # creating the answer vector:
+      wt_aa = pos_wt[1]
+      answer_vector = get_answer(wt_aa)
+      answers.append(answer_vector)
+
+  #print(exceptions)
+  return combined_data, answers
+
 def split_data(probs, SPLIT):
   # getting number of elements for each set:
   data_len = len(probs)
@@ -187,7 +223,7 @@ def split_data(probs, SPLIT):
   return training, validation, testing
 
 
-#---------------main-----------------------------
+#--------------- main -----------------------------
 
 # data paths
 cnn_pred = "../../output/PSICOV_CNN_output/"
@@ -208,7 +244,7 @@ bert_probs  = get_trans_probs(bert_pred)
 esm_probs  = get_trans_probs(esm_pred)
 
 # combine probabilities into one vector for each position:
-combined_data, answers = get_combined_data(cnn_probs, bert_probs, esm_probs)
+combined_data, answers = get_combined_data_2(cnn_probs, bert_probs, esm_probs)
 
 # split data into training, validation and testing
 training, validation, testing = split_data(combined_data, SPLIT)
@@ -222,16 +258,16 @@ assert len(testing) == len(test_answers)
 
 # saving data as numpy arrays:
 # training
-np.save(train_path + "nn_data_train_combo3.npy", training, allow_pickle = True)
-np.save(train_path + "answers_train_combo3.npy", train_answers, allow_pickle = True)
+np.save(train_path + "nn_data_train_combo3_new.npy", training, allow_pickle = True)
+np.save(train_path + "answers_train_combo3_new.npy", train_answers, allow_pickle = True)
 
 # validation
-np.save(val_path + "nn_data_val_combo3.npy", validation, allow_pickle = True)
-np.save(val_path + "answers_val_combo3.npy", val_answers, allow_pickle = True)
+np.save(val_path + "nn_data_val_combo3_new.npy", validation, allow_pickle = True)
+np.save(val_path + "answers_val_combo3_new.npy", val_answers, allow_pickle = True)
 
 # testing
-np.save(test_path + "nn_data_test_combo3.npy", testing, allow_pickle = True)
-np.save(test_path + "answers_test_combo3.npy", test_answers, allow_pickle = True)
+np.save(test_path + "nn_data_test_combo3_new.npy", testing, allow_pickle = True)
+np.save(test_path + "answers_test_combo3_new.npy", test_answers, allow_pickle = True)
 
 print()
 print("Finished saving data!")
