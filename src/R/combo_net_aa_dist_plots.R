@@ -137,7 +137,7 @@ plot_correct <- ordered %>%
 
 plot_correct
 
-ggsave(filename = "./analysis/figures/cor_groups_aa_dist.png", plot = plot_correct, width = 10, height = 9)
+#ggsave(filename = "./analysis/figures/cor_groups_aa_dist.png", plot = plot_correct, width = 10, height = 9)
 
 
 #----------------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ legend <- get_legend(
 with_legend <- plot_grid(abc, legend, rel_widths = c(3, 1))
 with_legend
 
-ggsave(filename = "./analysis/figures/group_dist_aa.png", plot = with_legend, width = 11, height = 10)
+#ggsave(filename = "./analysis/figures/group_dist_aa.png", plot = with_legend, width = 11, height = 10)
 
 
 

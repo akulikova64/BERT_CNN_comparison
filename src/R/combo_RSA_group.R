@@ -94,7 +94,7 @@ ridgeline_plot <- with_sa %>%
 
 ridgeline_plot
 
-ggsave(filename = "./analysis/figures/combo_groups_RSA.png", plot = ridgeline_plot, width = 10, height = 7)
+#ggsave(filename = "./analysis/figures/combo_groups_RSA.png", plot = ridgeline_plot, width = 10, height = 7)
 
 
 #----------------------------------------------------------------------------
@@ -410,6 +410,6 @@ esm_hist_plot
 
 abcd <- plot_grid(hist, cnn_hist_plot, bert_hist_plot, esm_hist_plot, ncol = 2, nrow = 2, labels = c('a', 'b', 'c', 'd'))
 
-ggsave(filename = "./analysis/figures/RSA_all_models.png", plot = abcd, width = 11, height = 11)
+#ggsave(filename = "./analysis/figures/RSA_all_models.png", plot = abcd, width = 11, height = 11)
 
 

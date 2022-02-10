@@ -229,7 +229,7 @@ odds_plot
 
 abc <- plot_grid(cor_plot, mis_plot, odds_plot, ncol = 1, nrow = 3, labels = c('a', 'b', 'c'))
 
-ggsave(filename = "./analysis/figures/group_aa_class_dist.png", plot = abc, width = 13, height = 8)
+#ggsave(filename = "./analysis/figures/group_aa_class_dist.png", plot = abc, width = 13, height = 8)
 
 #---------------------------------
 # redo of odds plot:
@@ -258,5 +258,105 @@ odds_plot <- odds %>%
 
 odds_plot
 
-ggsave(filename = "./analysis/figures/odds_plot_classes_groups.png", plot = odds_plot, width = 12, height = 8)
+#ggsave(filename = "./analysis/figures/odds_plot_classes_groups.png", plot = odds_plot, width = 12, height = 8)
+
+#-------------------------------------------------------------------------------------
+# aa dist with new groups
+#-------------------------------------------------------------------------------------
+
+
+#categories:
+# all three nets unanimous
+# only cnn's pick
+# only berts pick
+# only esm pick
+# transformers unanimous
+# completely unique
+
+get_group2 <- function(pred_aa, cnn_pick, bert_pick, esm_pick) {
+  
+  # CNN aa matches pred aa
+  if (pred_aa == cnn_pick & pred_aa != bert_pick & pred_aa != esm_pick |
+      pred_aa == cnn_pick & pred_aa == bert_pick & pred_aa != esm_pick |
+      pred_aa == cnn_pick & pred_aa != bert_pick & pred_aa == esm_pick) {
+    return("CNN chosen")
+  }
+  # a transformer (or both) match the prediction
+  if (pred_aa == bert_pick & pred_aa != esm_pick & pred_aa != cnn_pick |
+      pred_aa != bert_pick & pred_aa == esm_pick & pred_aa != cnn_pick|
+      pred_aa == bert_pick & pred_aa == esm_pick & pred_aa != cnn_pick){
+    return("Transformers chosen")
+  }
+  # unique prediction
+  if (pred_aa != cnn_pick & pred_aa != bert_pick & pred_aa != esm_pick) {
+    return("unique")
+  }
+  # all models unanimous
+  if (pred_aa == cnn_pick & pred_aa == bert_pick & pred_aa == esm_pick) {
+    return("models unanimous")
+  }
+  return("NA")
+}
+
+# lets look at aa dist of each group:
+with_groups <- correct_predictions %>%
+  mutate(group = pmap(list(pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa), get_group2)) %>%
+  mutate(class = map_chr(wt_aa, calc_class)) %>%
+  select(c(gene, position, wt_aa, group, class))
+
+for_cor_plot <- with_groups %>%
+  group_by(wt_aa, group) %>%
+  count() %>%
+  ungroup() %>%
+  group_by(group) %>%
+  mutate(sum = sum(n)) %>%
+  mutate(freq = n/sum)
+
+for_cor_plot$group <- as.character(for_cor_plot$group)
+for_cor_plot$group <- as.factor(for_cor_plot$group)
+for_cor_plot$wt_aa <- as.character(for_cor_plot$wt_aa)
+for_cor_plot$wt_aa <- as.factor(for_cor_plot$wt_aa)
+
+for_cor_plot <- for_cor_plot %>%
+  mutate(class = map_chr(wt_aa, calc_class))
+
+for_cor_plot$class <- as.character(for_cor_plot$class)
+for_cor_plot$class <- as.factor(for_cor_plot$class)
+  
+
+for_cor_plot <- for_cor_plot %>%
+  mutate(class = fct_relevel(class, "aliphatic", "small polar", "negative", "positive", "aromatic", "G or P")) %>%
+  mutate(group = fct_relevel(group, "CNN chosen", "Transformers chosen", "models unanimous", "unique")) %>%
+  mutate(wt_aa = fct_relevel(wt_aa, "I","V","A","L","G","E","T","D","F","K","P","R","S","N","Y","M","H","Q","C","W"))
+
+
+fills <- c("#990008", "#0a2575", "#b35900", "#1a6600", "#5c0679", "#9e9e2e")
+
+cor_plot <- for_cor_plot %>%
+  ggplot(aes(y = freq, x = wt_aa, fill = class)) +
+  geom_col(alpha = 0.75) +
+  facet_wrap(vars(group)) +
+  scale_fill_manual(
+    values = fills
+  ) +
+  scale_y_continuous(
+    name = "Frequency",
+    # limits = c(0.0, 0.8),
+    # breaks = seq(0.0, 0.8, by = 0.4),
+    expand = c(0, 0)) + 
+  scale_x_discrete(
+    name = "",
+    expand = c(0.03, 0.03)) + 
+  theme_cowplot(16) +
+  theme(
+    legend.position = "right",
+    axis.text = element_text(color = "black", size = 14),
+    strip.text.x = element_text(size = 16),
+    panel.grid.major.y = element_line(color = "grey92", size=0.5),
+    panel.grid.minor.y = element_line(color = "grey92", size=0.5),
+    panel.spacing = unit(2, "lines"))
+
+cor_plot
+
+#ggsave(filename = "./analysis/figures/four_groups_aa_dist.png", plot = cor_plot, width = 11, height = 8.5)
 

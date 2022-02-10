@@ -229,7 +229,7 @@ cor_and_mis_plots <- plot_grid(cor_bar_plot, mis_bar_plot, ncol = 2, nrow = 1, l
 with_odds <- plot_grid(cor_and_mis_plots, odds_bar_plot, nrow = 2, ncol = 1, labels = c('', 'c'), scale = 0.9)
 with_odds
 
-ggsave(filename = "./analysis/figures/choices_barplot_cor_mis2.png", plot = with_odds, width = 10, height = 6)
+#ggsave(filename = "./analysis/figures/choices_barplot_cor_mis2.png", plot = with_odds, width = 10, height = 6)
 
 
 #-------------------------------------------------------------------------------
@@ -254,6 +254,8 @@ counts <- with_groups %>%
   mutate(label_text = paste0(round(freq_cor*100, 1), "%"))
 
 
+counts$group <- unlist(counts$group)
+counts <- as.data.frame(counts) 
 counts$group <- as.factor(counts$group)
 counts$label_text <- as.character(counts$label_text)
 
@@ -263,33 +265,73 @@ counts$label_text <- as.character(counts$label_text)
 
 
 within_bar_plot <- counts %>%
-  ggplot(aes(x = fct_rev(fct_reorder(group, freq_cor)), y = freq_cor)) +
-  geom_col(fill = "#ad9ca9") +
-  scale_x_discrete(
+  ggplot(aes(y = fct_reorder(group, freq_cor), x = freq_cor)) +
+  geom_col(fill = "#8ec8cb", color = "#316785", width = 0.8, size = 0.3) +
+  scale_y_discrete(
     name = "",
     expand = c(0,0)
   ) +
-  scale_y_continuous(
+  scale_x_continuous(
     name = "Proportion correct",
-    expand = c(0,0),
-    limits = c(0.0, 1.00),
+    expand = c(0.0,0.0),
+    limits = c(0.0, 1.05),
     breaks = (seq(from = 0.0, to = 1.0, by = 0.2))
   ) +
   geom_text(aes(label = label_text),
-            vjust = -0.5,
+            #vjust = -0.5,
+            hjust = -0.1,
             color = "black") +
   theme_cowplot(11) +
   theme(
     panel.background = element_blank(),
+    #panel.grid.major.x = element_line(colour="gray80", size=0.1),
+    #panel.grid.minor.x = element_line(colour="gray90", size=0.1),
     axis.text = element_text(
       color = "black", 
-      size = 11),
-    axis.text.x = element_text(
-      angle = 45, hjust = 1))
+      size = 11))
 
 within_bar_plot 
 
-ggsave(filename = "./analysis/figures/choices_barplot_within_group.png", plot = within_bar_plot, width = 9, height = 6)
+#ggsave(filename = "./analysis/figures/choices_barplot_within_group3.png", plot = within_bar_plot, width = 8.5, height = 5)
+
+with_groups$group <- unlist(with_groups$group)
+with_groups <- as.data.frame(with_groups) 
+with_groups$group <- as.factor(with_groups$group)
+with_groups$label_text <- as.character(with_groups$label_text)
+
+# get bar plot with proportion of sites:
+within_bar_plot2 <- with_groups %>%
+  ggplot(aes(y = group, fill = status)) +
+  geom_bar(width = 0.8, 
+           size = 0.3, 
+           position = "stack"
+           ) +
+  # scale_y_discrete(
+  #   name = "",
+  #   expand = c(0,0)
+  # ) +
+  # scale_x_continuous(
+  #   name = "Proportion of sites",
+  #   expand = c(0.0,0.0),
+  #   limits = c(0.0, 1.05),
+  #   breaks = (seq(from = 0.0, to = 1.0, by = 0.2))
+  # ) +
+  # geom_text(aes(label = label_text),
+  #           #vjust = -0.5,
+  #           hjust = -0.1,
+  #           color = "black") +
+  theme_cowplot(11) +
+  theme(
+    panel.background = element_blank(),
+    #panel.grid.major.x = element_line(colour="gray80", size=0.1),
+    #panel.grid.minor.x = element_line(colour="gray90", size=0.1),
+    axis.text = element_text(
+      color = "black", 
+      size = 11))
+
+within_bar_plot2
+
+
 
 #-----------------------------------------------------------------------------------------------
 # now find the percent of positions where the highest conf aa was chosen. What is that percent?
