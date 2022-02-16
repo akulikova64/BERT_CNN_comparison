@@ -225,11 +225,12 @@ odds_bar_plot <- odds %>%
 
 odds_bar_plot 
 
-cor_and_mis_plots <- plot_grid(cor_bar_plot, mis_bar_plot, ncol = 2, nrow = 1, labels = c('a', 'b'), vjust = 0.5)
-with_odds <- plot_grid(cor_and_mis_plots, odds_bar_plot, nrow = 2, ncol = 1, labels = c('', 'c'), scale = 0.9)
-with_odds
+cor_and_mis_plots <- plot_grid(cor_bar_plot, mis_bar_plot, ncol = 2, nrow = 1, labels = c('a', 'b'))
+#with_odds <- plot_grid(cor_and_mis_plots, odds_bar_plot, nrow = 2, ncol = 1, labels = c('', 'c'), scale = 0.9)
+#with_odds
+cor_and_mis_plots
 
-#ggsave(filename = "./analysis/figures/choices_barplot_cor_mis2.png", plot = with_odds, width = 10, height = 6)
+ggsave(filename = "./analysis/figures/choices_barplot_cor_mis3.png", plot = cor_and_mis_plots, width = 9, height = 4)
 
 
 #-------------------------------------------------------------------------------

@@ -273,27 +273,28 @@ odds_plot
 # transformers unanimous
 # completely unique
 
+
 get_group2 <- function(pred_aa, cnn_pick, bert_pick, esm_pick) {
   
-  # CNN aa matches pred aa
+  # CNN aa matches pred aa (only CNN or also one of the transformers)
   if (pred_aa == cnn_pick & pred_aa != bert_pick & pred_aa != esm_pick |
       pred_aa == cnn_pick & pred_aa == bert_pick & pred_aa != esm_pick |
       pred_aa == cnn_pick & pred_aa != bert_pick & pred_aa == esm_pick) {
-    return("CNN chosen")
+    return("prediction matches \nCNN")
   }
-  # a transformer (or both) match the prediction
+  # a transformer (or both) match the prediction (CNN does not match)
   if (pred_aa == bert_pick & pred_aa != esm_pick & pred_aa != cnn_pick |
       pred_aa != bert_pick & pred_aa == esm_pick & pred_aa != cnn_pick|
       pred_aa == bert_pick & pred_aa == esm_pick & pred_aa != cnn_pick){
-    return("Transformers chosen")
+    return("prediction matches \ntransformer/s")
   }
-  # unique prediction
+  # unique prediction (non match)
   if (pred_aa != cnn_pick & pred_aa != bert_pick & pred_aa != esm_pick) {
-    return("unique")
+    return("unique prediction")
   }
   # all models unanimous
   if (pred_aa == cnn_pick & pred_aa == bert_pick & pred_aa == esm_pick) {
-    return("models unanimous")
+    return("prediction matches \nall models")
   }
   return("NA")
 }
@@ -326,7 +327,7 @@ for_cor_plot$class <- as.factor(for_cor_plot$class)
 
 for_cor_plot <- for_cor_plot %>%
   mutate(class = fct_relevel(class, "aliphatic", "small polar", "negative", "positive", "aromatic", "G or P")) %>%
-  mutate(group = fct_relevel(group, "CNN chosen", "Transformers chosen", "models unanimous", "unique")) %>%
+  mutate(group = fct_relevel(group, "prediction matches \nCNN", "prediction matches \ntransformer/s", "prediction matches \nall models", "unique prediction")) %>%
   mutate(wt_aa = fct_relevel(wt_aa, "I","V","A","L","G","E","T","D","F","K","P","R","S","N","Y","M","H","Q","C","W"))
 
 
@@ -343,7 +344,7 @@ cor_plot <- for_cor_plot %>%
     name = "Frequency",
     # limits = c(0.0, 0.8),
     # breaks = seq(0.0, 0.8, by = 0.4),
-    expand = c(0, 0)) + 
+    expand = expansion(add = c(0,0.005))) + 
   scale_x_discrete(
     name = "",
     expand = c(0.03, 0.03)) + 
@@ -358,5 +359,5 @@ cor_plot <- for_cor_plot %>%
 
 cor_plot
 
-#ggsave(filename = "./analysis/figures/four_groups_aa_dist.png", plot = cor_plot, width = 11, height = 8.5)
+ggsave(filename = "./analysis/figures/four_groups_aa_dist2.png", plot = cor_plot, width = 11, height = 8.5)
 

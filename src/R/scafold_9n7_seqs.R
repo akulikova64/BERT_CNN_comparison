@@ -8,6 +8,7 @@ library(colorspace)
 # loading data:
 bert_9n7 <- read.csv(file = "./output/bert_9n7_nonresurfaced.csv", header=TRUE, sep=",")
 esm1b_9n7 <- read.csv(file = "./output/esm1b9n7_nonresurfaced.csv", header=TRUE, sep=",")
+cnn_9n7 <- read.csv(file = "./output/esm1b9n7_nonresurfaced.csv", header=TRUE, sep=",")
 
 #-------------------------------------------------------------------------------
 # getting n-eff=:
