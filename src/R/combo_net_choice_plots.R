@@ -5,10 +5,10 @@ library(tidyverse)
 library(cowplot)
 options(scipen = 999)
 library(colorspace)
-divergingx_palettes(n = 7, plot = TRUE)
+
 
 # loading data:
-combo_data <- read.csv(file = "./data/transfer_learning_net/predictions__model_combo3_run_1.csv", header=TRUE, sep=",")
+combo_data <- read_csv(file = "./data/transfer_learning_net/predictions__model_combo3_run_1.csv")
 
 correct_predictions <- combo_data %>%
   select(c(gene, position, wt_aa, pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa)) %>%
@@ -87,8 +87,9 @@ get_group <- function(pred_aa, cnn_pick, bert_pick, esm_pick) {
 with_groups <- correct_predictions %>%
   mutate(group = pmap(list(pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa), get_group))
 
+with_groups$group <- unlist(with_groups$group)
+
 counts <- with_groups %>%
-  select(group) %>%
   count(group)
 
 group_freqs_cor <- counts %>%
@@ -103,6 +104,7 @@ group_freqs_cor$group <- as.character(group_freqs_cor$group)
 groups_only <- with_groups %>%
   select(group)
 
+cor <- group_freqs_cor
 # correct sites bar plot:
 cor_bar_plot <- group_freqs_cor %>%
   ggplot(aes(y = fct_reorder(group, freq), x = freq)) +
@@ -115,7 +117,7 @@ cor_bar_plot <- group_freqs_cor %>%
     name = "Proportion of sites",
     limits = c(0.0, 0.56),
     breaks = seq(from = 0.0, to = 0.5, by = 0.1),
-    expand = c(0,0)
+    expand = expansion(add = c(0, 0.05))
    ) +
   geom_text(aes(label = count), 
             hjust = - 0.1,
@@ -126,7 +128,8 @@ cor_bar_plot <- group_freqs_cor %>%
     panel.grid.major.x = element_line(colour="gray90", size=0.1),
     axis.text = element_text(
       color = "black", 
-      size = 10))
+      size = 10)) 
+  #theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
 
 cor_bar_plot
   
@@ -162,6 +165,7 @@ groups_only <- with_groups %>%
 
 order <- c("all models unanimous", "BERT and ESM1b", "only CNN", "CNN and BERT", "only BERT", "CNN and ESM1b", "only ESM1b", "unique")
 
+mis <- group_freqs_mis
 mis_bar_plot <- group_freqs_mis %>%
   ggplot(aes(y = fct_rev(fct_relevel(group, order)), x = freq)) +
   geom_col(fill = "#839ea8") +
@@ -173,7 +177,7 @@ mis_bar_plot <- group_freqs_mis %>%
     name = "Proportion of sites",
     limits = c(0.0, 0.56),
     breaks = seq(from = 0.0, to = 0.5, by = 0.1),
-    expand = c(0,0)
+    expand = expansion(add = c(0, 0.05))
   ) +
   geom_text(aes(label = count), 
             hjust = - 0.1,
@@ -184,9 +188,157 @@ mis_bar_plot <- group_freqs_mis %>%
     panel.grid.major.x = element_line(colour="gray90", size=0.1),
     axis.text = element_text(
       color = "black", 
-      size = 10))
+      size = 10)) 
+mis_bar_plot
 
-mis_bar_plot 
+
+#--------------------------------------------------
+# lets make the same plot for all predictions:
+
+all_predictions <- combo_data %>%
+  select(c(gene, position, wt_aa, pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa))
+
+# lets plot freq of each group:
+
+with_groups <- all_predictions %>%
+  mutate(group = pmap(list(pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa), get_group))
+
+counts <- with_groups %>%
+  select(group) %>%
+  count(group)
+
+group_freqs <- counts %>%
+  mutate(sum = sum(n)) %>%
+  mutate(freq = n/sum) %>%
+  rename(count = n) %>%
+  select(c(group, count, freq)) 
+#mutate(label_text = paste0(count, " (", round(freq*100, 1), "%)"))
+
+group_freqs$group <- as.character(group_freqs$group)
+
+groups_only <- with_groups %>%
+  select(group)
+
+# all sites bar plot:
+
+order <- c("all models unanimous", "BERT and ESM1b", "only CNN", "only BERT", "CNN and BERT", "CNN and ESM1b", "only ESM1b", "unique")
+all <- group_freqs
+all_bar_plot <- group_freqs %>%
+  ggplot(aes(y = fct_rev(fct_relevel(group, order)), x = freq)) +
+  geom_col(fill = "#839ea8") +
+  scale_y_discrete(
+    name = "",
+    expand = c(0,0),
+  ) +
+  scale_x_continuous(
+    name = "Proportion of sites",
+    limits = c(0.0, 0.56),
+    breaks = seq(from = 0.0, to = 0.5, by = 0.1),
+    expand = expansion(add = c(0, 0.05))
+  ) +
+  geom_text(aes(label = count), 
+            hjust = - 0.1,
+            color = "black",
+            size = 3) +
+  theme_cowplot(10) +
+  theme(
+    panel.grid.major.x = element_line(colour="gray90", size=0.1),
+    axis.text = element_text(
+      color = "black", 
+      size = 10)) +
+  theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
+
+all_bar_plot
+
+#--------------------------------------------------
+# lets make the filled plot (proportions):
+
+all_predictions <- combo_data %>%
+  select(c(gene, position, wt_aa, pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa)) %>%
+  mutate(prediction = ifelse(wt_aa == pred_aa, "correct", "misprediction"))
+
+# lets plot freq of each group:
+
+with_groups <- all_predictions %>%
+  mutate(group = pmap_chr(list(pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa), get_group)) %>%
+  select(prediction, group)
+
+filled_bar_plot <- with_groups %>%
+  ggplot(aes(y = fct_rev(fct_relevel(group, "all models unanimous", "CNN and BERT", "CNN and ESM1b", "BERT and ESM1b", "only CNN", "only BERT", "only ESM1b", "unique")), fill = fct_rev(prediction))) +
+  geom_bar(position = "fill") +
+  scale_y_discrete(
+    name = "",
+    expand = c(0,0),
+  ) +
+  scale_x_continuous(
+    name = "Proportion of sites",
+    limits = c(0.0, 0.56),
+    breaks = seq(from = 0.0, to = 0.5, by = 0.1),
+    expand = expansion(add = c(0, 0.05))
+  ) +
+  geom_text(aes(label = count),
+            hjust = - 0.1,
+            color = "black",
+            size = 3) +
+  labs(fill = "prediction") +
+  theme_cowplot(10) +
+  theme(
+    panel.grid.major.x = element_line(colour="gray90", size=0.1),
+    axis.text = element_text(
+      color = "black", 
+      size = 10)) 
+  #theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
+
+filled_bar_plot
+
+
+
+s#--------------------------------------------------------------------------------------
+# lets make a faceted plot:
+
+all <- all %>%
+  mutate(data = "all data")
+
+mis <- mis %>%
+  mutate(data = "mispredictions")
+
+cor <- cor %>%
+  mutate(data = "correct \npredictions")
+
+all_mis_cor <- rbind(all, cor, mis)
+
+facet_plot <- all_mis_cor %>%
+  ggplot(aes(y = fct_rev(fct_relevel(group, order)), x = freq)) +
+  geom_col(fill = "#66102a",
+           color = "#3b0414",
+           alpha = 0.6,
+           size = 0.3
+  ) +
+  facet_wrap(~data) +
+  scale_y_discrete(
+    name = "",
+    expand = c(0,0),
+  ) +
+  scale_x_continuous(
+    name = "Proportion of sites",
+    limits = c(0.0, 0.56),
+    breaks = seq(from = 0.0, to = 0.5, by = 0.1),
+    expand = expansion(add = c(0, 0.05))
+  ) +
+  geom_text(aes(label = count), 
+            hjust = - 0.1,
+            color = "black",
+            size = 3) +
+  theme_cowplot(10) +
+  theme(
+    panel.grid.major.x = element_line(colour="gray90", size=0.1),
+    axis.text = element_text(
+      color = "black", 
+      size = 10)) 
+
+facet_plot
+#ggsave(filename = "./analysis/figures/choices_barplot_facet.png", plot = facet_plot, width = 9, height = 5)
+
 
 
 #Lets get odds ratio for these plots
@@ -225,12 +377,12 @@ odds_bar_plot <- odds %>%
 
 odds_bar_plot 
 
-cor_and_mis_plots <- plot_grid(cor_bar_plot, mis_bar_plot, ncol = 2, nrow = 1, labels = c('a', 'b'))
+cor_and_mis_plots <- plot_grid(cor_bar_plot, mis_bar_plot, all_bar_plot, ncol = 3, nrow = 1, labels = c('a', 'b', 'c'))
 #with_odds <- plot_grid(cor_and_mis_plots, odds_bar_plot, nrow = 2, ncol = 1, labels = c('', 'c'), scale = 0.9)
 #with_odds
 cor_and_mis_plots
 
-ggsave(filename = "./analysis/figures/choices_barplot_cor_mis3.png", plot = cor_and_mis_plots, width = 9, height = 4)
+ggsave(filename = "./analysis/figures/choices_barplot_cor_mis_all.png", plot = cor_and_mis_plots, width = 9, height = 5)
 
 
 #-------------------------------------------------------------------------------

@@ -10,10 +10,13 @@ options(scipen = 999)
 
 # this script compares BERT to CNN for accuracy in predictions
 bert_data <- read.csv(file = "./output/PSICOV_BERT_predictions.csv", header=TRUE, sep=",")
-cnn_data <- read.csv(file = "./output/cnn_wt_max_freq.csv", header=TRUE, sep=",")
+cnn_data <- read.csv(file = "./output/cnn_wt_max_freq.csv", header=TRUE, sep=",") #old
+#cnn_data2 <- read.csv(file = "./output/resnet_psicov_03_15_22.csv", header=TRUE, sep=",")
+#cnn_data_raw <- read.csv(file = "./output/resnet_psicov_03_15_22.csv", header=TRUE, sep=",")
 esm_data <- read.csv(file = "./output/PSICOV_ESM1b_predictions.csv", header=TRUE, sep=",")
 align_data <- read.csv(file = "./output/stats_align_all.csv", header=TRUE, sep=",")
 combo_data <- read.csv(file = "./data/transfer_learning_net/predictions__model_combo3_run_1.csv", header=TRUE, sep=",")
+
 
 # clean cnn data:
 cnn_data_clean <- cnn_data %>%
@@ -102,13 +105,160 @@ joined_stats <- stats_1 %>%
             std_error = sd(freq_predict_wt)/sqrt(length(freq_predict_wt)))
 
 
+
+#---------loading and cleaning new data--------------------
+
+get_one_letter <- function(aa){
+  if (aa == 'ALA'){
+    return('A')
+  }
+  if (aa == 'ARG'){
+    return('R') 
+  }
+  if (aa == 'ASN'){
+    return('N')
+  }
+  if (aa == 'ASP'){
+    return('D')
+  }
+  if (aa == 'CYS'){
+    return('C')
+  }
+  if (aa == 'GLN'){
+    return('Q')
+  }
+  if (aa == 'GLU'){
+    return('E')
+  }
+  if (aa == 'GLY'){
+    return('G')
+  }
+  if (aa == 'HIS'){
+    return('H')
+  }
+  if (aa == 'ILE'){
+    return('I')
+  }
+  if (aa == 'LEU'){
+    return('L')
+  }
+  if (aa == 'LYS'){
+    return('K')
+  }
+  if (aa == 'MET'){
+    return('M')
+  }
+  if (aa == 'PHE'){
+    return('F')
+  }
+  if (aa == 'PRO'){
+    return('P')
+  }
+  if (aa == 'SER'){
+    return('S')
+  }
+  if (aa == 'THR'){
+    return('T')
+  }
+  if (aa == 'TRP'){
+    return('W')
+  }
+  if (aa == 'TYR'){
+    return('Y')
+  }
+  if (aa == 'VAL'){
+    return('V')
+  }
+  else {
+    return(NA)
+  }
+}
+
+
+
+#NEW DATA
+#bert
+bert_new = read.csv(file = "./data/combined_protbert_translated.csv", header=TRUE, sep=",")
+
+bert_data2 <- bert_new %>% # choose which transformer model to use here
+  rename(row = X,
+         aa_wt = wtAA,
+         position = pos,
+         freq_wt = wt_prob
+         ) %>%
+  mutate(freq_pred = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
+  pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
+  mutate(aa_pred = ifelse(freq_pred == freq, aa, NA)) %>%
+  na.omit() %>%
+  select(-c(aa, freq, row)) %>%
+  mutate(group = "BERT") %>%
+  mutate(aa_wt = map_chr(aa_wt, get_one_letter))
+
+#esm
+esm1v_new = read.csv(file = "./data/combined_esm_translated.csv", header=TRUE, sep=",")
+
+esm_data2 <- esm1v_new %>% # choose which transformer model to use here
+  rename(row = X,
+         aa_wt = wtAA,
+         position = pos,
+         freq_wt = wt_prob
+  ) %>%
+  mutate(freq_pred = pmax(A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)) %>%
+  pivot_longer(cols = c(A:Y), names_to = "aa", values_to = "freq") %>%
+  mutate(aa_pred = ifelse(freq_pred == freq, aa, NA)) %>%
+  na.omit() %>%
+  select(-c(aa, freq, row)) %>%
+  mutate(group = "ESM1v") %>%
+  mutate(aa_wt = map_chr(aa_wt, get_one_letter))
+
+# joining all data:
+joined <- rbind(cnn_data_clean, bert_data2)
+joined2 <- rbind(joined, esm_data2)
+
+joined2 <- joined2 %>%
+  select(-freq_wt)
+
+combo_data2 <- combo_data %>%
+  select(c(gene, position, wt_aa, pred_aa, pred_freq)) %>%
+  rename(aa_wt = wt_aa,
+         aa_pred = pred_aa,
+         freq_pred = pred_freq) %>%
+  mutate(group = "Combined")
+
+joined3 <- rbind(joined2, combo_data2)
+
+match_wt <- joined3 %>%
+  mutate(match_predict_wt = aa_pred == aa_wt)
+
+#data entries where the predicted amino acid matches the wt
+stats_1 <- match_wt %>%
+  group_by(gene, group) %>%
+  summarise(freq_predict_wt = sum(match_predict_wt, na.rm = TRUE)/sum(!is.na(match_predict_wt)),
+            mean_conf = mean(freq_pred))
+
+means <- stats_1 %>%
+  group_by(group) %>%
+  summarise(mean = mean(freq_predict_wt))
+# CNN: 75.8% accuracy
+# BERT transformer: 71.6% accuracy
+# ESM1b transformer: 60.58% accuracy
+
+joined_stats <- stats_1 %>%
+  select(-c(mean_conf)) %>%
+  group_by(group) %>%
+  summarise(estimate = mean(freq_predict_wt),
+            std_error = sd(freq_predict_wt)/sqrt(length(freq_predict_wt)))
+
+
+
+#-------------MAKING THE FIGURE-----------------------------
 # making figure:
 
 accuracy_all <- stats_1 %>%
   ggplot(aes(y = freq_predict_wt, 
-             x = fct_relevel(group, "ESM1b", "BERT", "CNN", "Combined"), 
-             fill = fct_relevel(group, "ESM1b", "BERT", "CNN", "Combined"), 
-             color = fct_relevel(group, "ESM1b", "BERT", "CNN", "Combined"))) +
+             x = fct_relevel(group, "ESM1v", "BERT", "CNN", "Combined"), 
+             fill = fct_relevel(group, "ESM1v", "BERT", "CNN", "Combined"), 
+             color = fct_relevel(group, "ESM1v", "BERT", "CNN", "Combined"))) +
   geom_violin(alpha = 0.6, 
               size = 0.4, 
               bw = 0.02, 
@@ -161,7 +311,7 @@ wider_stats <- stats_1 %>%
 #cor <- cor(wider_stats$BERT ~ wider_stats$ESM1b)
 
 cor_esm_cnn <- wider_stats %>%
-  ggplot(aes(x = ESM1b, y = CNN)) +
+  ggplot(aes(x = ESM1v, y = CNN)) +
   geom_point(
     shape = 21, 
     color = "black",
@@ -182,7 +332,7 @@ cor_esm_cnn <- wider_stats %>%
   #stat_regline_equation(label.y = 0.95, label.x = 0.02, aes(label = ..eq.label..)) +
   #stat_regline_equation(label.y = 0.89, label.x = 0.02, aes(label = ..rr.label..)) +
   scale_x_continuous(
-    name = "ESM1b",
+    name = "ESM1v",
     limits = c(0.0, 1.01),
     breaks = seq(from = 0.0, to = 1.0, by = 0.2),
     expand = c(0, 0)) +
@@ -229,7 +379,7 @@ cor_bert_cnn <- wider_stats %>%
 cor_bert_cnn
 
 cor_bert_esm <- wider_stats %>%
-  ggplot(aes(x = BERT, y = ESM1b)) +
+  ggplot(aes(x = BERT, y = ESM1v)) +
   geom_point(
     shape = 21, 
     color = "black",
@@ -242,7 +392,7 @@ cor_bert_esm <- wider_stats %>%
   ) +
   #geom_smooth(method=lm, se=FALSE, color = "maroon") +
   scale_y_continuous(
-    name = "ESM1b",
+    name = "ESM1v",
     limits = c(0.0, 1.01),
     breaks = (seq(from = 0.0, to = 1.0, by = 0.2)),
     expand = c(0, 0)
@@ -266,7 +416,7 @@ a <- plot_grid(accuracy_all, nrow = 1, align="h", labels = c('a'))
 bcd <- plot_grid(cor_bert_cnn, cor_esm_cnn, cor_bert_esm, nrow = 1, align="h", labels = c('b', 'c', 'd'))
 abcd <- plot_grid(a, bcd, nrow = 2, rel_heights = c(3, 2), align = "v", labels = c('', ''))
 abcd
-ggsave(filename = "./analysis/figures/accuracy_fig4.png", plot = abcd, width = 9, height = 7)
+ggsave(filename = "./analysis/figures/accuracy_fig_esm1v.png", plot = abcd, width = 9, height = 7)
 
 
 #------------------------------------------------------------------------------------------------

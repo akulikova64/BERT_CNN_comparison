@@ -326,7 +326,7 @@ cnn_hist_plot <- cnn_hist %>%
   #geom_pointrange() +
   geom_hex(bins = 15) +
   scale_x_continuous(
-    name = "RSA (Å^2)",
+    name = "RSA",
     limits = c(0.0, 1.0),
     #breaks = seq(0.0, 1.0, by = 0.2),
     expand = c(0, 0)) +

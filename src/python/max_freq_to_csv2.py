@@ -103,15 +103,16 @@ def get_class_freq_2(wt_aa, line):
 #--------------- main ----------------------------
 
 
-input_path = "../../output/3ogo_final_tot.csv"
-output_path = "../../output/cnn_wt_max_freq_3ogo.csv"
+#input_path = "../../output/3ogo_final_tot.csv"
+input_path = "../../output/nanobodyscaffold_EnsResNet.csv"
+output_path = "../../output/cnn_wt_max_freq_9n7.csv"
 
 #fileList = os.listdir(input_path)
 # old: aaList = ['H', 'E', 'D',  'R', 'K', 'S', 'T', 'N', 'Q', 'A', 'V', 'L', 'I', 'M', 'F', 'Y', 'W', 'P', 'G', 'C']
 aaList = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
 aaCodes = {'ALA':'A', 'ARG':'R', 'ASN':'N', 'ASP':'D', 'CYS':'C', 'GLN':'Q', 'GLU':'E', 'GLY':'G', 'HIS':'H', 'ILE':'I', 'LEU':'L', 'LYS':'K', 'MET':'M', 'PHE':'F', 'PRO':'P', 'SER':'S', 'THR':'T','TRP':'W', 'TYR':'Y', 'VAL':'V'}
 
-with open(output_path, "w", newline='\n', encoding='utf-8') as CSV_file:
+with open(output_path, "w") as CSV_file:
   writer = csv.writer(CSV_file)
   writer.writerow(['gene', 'group', 'chain', 'position', 'aa', 'freq'])
 
@@ -130,6 +131,11 @@ with open(output_path, "w", newline='\n', encoding='utf-8') as CSV_file:
   # new (correct) structure of "line" in lines:
   #pos, aa_id, pdb_id, chain_id, pos, wtAA, prAA, wt_prob, pred_prob, avg_log_ratio, prALA, prARG, prASN, prASP, prCYS,prGLN,prGLU,prGLY,prHIS,prILE,prLEU,prLYS,prMET,prPHE,prPRO,prSER,prTHR,prTRP,prTYR,prVAL,prHydrophobic,prAromatic,prPolarUncharged,prCationic,prAnionic,prCharged,prSmall,prSulfur,prAcyl,prAlcohol
   # 0     1      2        3       4    5     6      7          8            9         10      11     12    13     14    15    16    17   18    19    20    21     22     23    24   25    26    27    28    29      30             31         32               33        34
+  
+  #updated structure of "line" in lines (EndResNet):
+  #model, pdb_id, chain_id, pos, wtAA, prAA, wt_prob, pred_prob, avg_log_ratio, prALA, prARG, prASN, prASP, prCYS, prGLN, prGLU, prGLY, prHIS, prILE, prLEU, prLYS, prMET, prPHE, prPRO, prSER, prTHR, prTRP, prTYR, prVAL
+  # 0      1         2       3    4     5     6           7          8          9       10       11   12     13      14     15     16    17     18      19    20     21      22    23     24     25      26    27     28
+  
   #gene = str(file[0:4]).lower()
   gene = "3ogo"
 

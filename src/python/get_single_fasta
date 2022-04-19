@@ -1,0 +1,23 @@
+import sys
+import os
+
+
+input_path = "../../data/seqs_4122"
+output_path = "../../data/seqs_4122_all.fasta"
+
+file_list = os.listdir(input_path)
+
+with open(output_path, "w") as fasta_all_file:
+    for file in file_list:
+        with open(input_path + "/" + file, "r") as seq_file:
+            lines = seq_file.readlines()
+            seq = lines[0]
+            gene = file[0:4].lower()
+            chain = file[5]
+            if chain == "1":
+                fasta_all_file.write(">" + gene + "\n")
+                fasta_all_file.write(seq + "\n")
+            else:
+                print(file)
+
+

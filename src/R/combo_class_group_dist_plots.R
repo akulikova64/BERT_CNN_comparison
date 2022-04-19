@@ -79,8 +79,10 @@ get_group <- function(pred_aa, cnn_pick, bert_pick, esm_pick) {
   if (pred_aa != cnn_pick & pred_aa != bert_pick & pred_aa != esm_pick) {
     return("unique")
   }
-  return("NA")
+  return(NA_character_)
 }
+
+
 
 # lets look at aa dist of each group:
 with_groups <- correct_predictions %>%
@@ -89,12 +91,12 @@ with_groups <- correct_predictions %>%
   select(c(gene, position, wt_aa, group, class))
 
 for_cor_plot <- with_groups %>%
-  group_by(class, group) %>%
-  count() %>%
-  ungroup() %>%
+  count(class, group) 
+#%>%
   group_by(class) %>%
   mutate(sum = sum(n)) %>%
-  mutate(freq = n/sum)
+  mutate(freq = n/sum) 
+
 
 for_cor_plot$group <- as.character(for_cor_plot$group)
 for_cor_plot$group <- as.factor(for_cor_plot$group)
@@ -359,5 +361,25 @@ cor_plot <- for_cor_plot %>%
 
 cor_plot
 
-ggsave(filename = "./analysis/figures/four_groups_aa_dist2.png", plot = cor_plot, width = 11, height = 8.5)
+#ggsave(filename = "./analysis/figures/four_groups_aa_dist2.png", plot = cor_plot, width = 11, height = 8.5)
+
+#--------------------------------------------------------------------------------------
+#lets look at the distribution of secondary structure for the four groups above.
+
+sec_struc <- read.csv(file = "./output/second_struc.csv", header=TRUE, sep=",")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
