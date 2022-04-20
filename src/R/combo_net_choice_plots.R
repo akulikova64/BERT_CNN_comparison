@@ -225,28 +225,30 @@ order <- c("all models unanimous", "BERT and ESM1b", "only CNN", "only BERT", "C
 all <- group_freqs
 all_bar_plot <- group_freqs %>%
   ggplot(aes(y = fct_rev(fct_relevel(group, order)), x = freq)) +
-  geom_col(fill = "#839ea8") +
+  geom_col(
+    fill = "#875c12",
+    alpha = 0.5) +
   scale_y_discrete(
     name = "",
     expand = c(0,0),
   ) +
   scale_x_continuous(
     name = "Proportion of sites",
-    limits = c(0.0, 0.56),
+    limits = c(0.0, 0.5),
     breaks = seq(from = 0.0, to = 0.5, by = 0.1),
-    expand = expansion(add = c(0, 0.05))
+    expand = expansion(add = c(0, 0))
   ) +
   geom_text(aes(label = count), 
             hjust = - 0.1,
             color = "black",
-            size = 3) +
+            size = 3.5) +
   theme_cowplot(10) +
   theme(
-    panel.grid.major.x = element_line(colour="gray90", size=0.1),
+    panel.grid.major.x = element_line(colour="gray65", size=0.2, linetype = "dashed"),
     axis.text = element_text(
       color = "black", 
-      size = 10)) +
-  theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
+      size = 10))
+#theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
 
 all_bar_plot
 
@@ -255,41 +257,77 @@ all_bar_plot
 
 all_predictions <- combo_data %>%
   select(c(gene, position, wt_aa, pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa)) %>%
-  mutate(prediction = ifelse(wt_aa == pred_aa, "correct", "misprediction"))
+  mutate(prediction = ifelse(wt_aa == pred_aa, "correct predictions", "mispredictions"))
 
 # lets plot freq of each group:
 
 with_groups <- all_predictions %>%
   mutate(group = pmap_chr(list(pred_aa, cnn_win_aa, bert_win_aa, esm_win_aa), get_group)) %>%
-  select(prediction, group)
+  select(prediction, group) %>%
+  count(prediction, group) #%>%
+# pivot_wider(names_from = prediction, values_from = n) %>%
+# mutate(freq = )
+
+#colors = c("#ab6f07", "#785782", "#608046", "#66102a")
 
 filled_bar_plot <- with_groups %>%
-  ggplot(aes(y = fct_rev(fct_relevel(group, "all models unanimous", "CNN and BERT", "CNN and ESM1b", "BERT and ESM1b", "only CNN", "only BERT", "only ESM1b", "unique")), fill = fct_rev(prediction))) +
-  geom_bar(position = "fill") +
+  ggplot(aes(y = fct_rev(fct_relevel(group, "all models unanimous", "CNN and BERT", "CNN and ESM1b", "BERT and ESM1b", "only CNN", "only BERT", "only ESM1b", "unique")), x = n, fill = fct_rev(prediction))) +
+  geom_col(position = "fill",
+           alpha = 0.6) +
   scale_y_discrete(
     name = "",
-    expand = c(0,0),
+    expand = c(0,0)
   ) +
   scale_x_continuous(
-    name = "Proportion of sites",
-    limits = c(0.0, 0.56),
-    breaks = seq(from = 0.0, to = 0.5, by = 0.1),
-    expand = expansion(add = c(0, 0.05))
+    name = "Proportion within category",
+    breaks = seq(from = 0.0, to = 1.0, by = 0.2),
+    expand = expansion(add = c(0, 0))
   ) +
-  geom_text(aes(label = count),
-            hjust = - 0.1,
-            color = "black",
-            size = 3) +
-  labs(fill = "prediction") +
+  scale_fill_manual(values = c("#839ea8", "#91595c"), breaks=c('correct predictions', 'mispredictions')) +
+  labs(fill = "") +
   theme_cowplot(10) +
   theme(
-    panel.grid.major.x = element_line(colour="gray90", size=0.1),
+    panel.grid.major.x = element_line(colour="gray29", size=0.2, linetype = "dashed"),
+    panel.grid.minor.x = element_line(colour="gray29", size=0.2, linetype = "dashed"),
+    legend.position = "right",
     axis.text = element_text(
-      color = "black", 
+      color = "black",
       size = 10)) 
-  #theme(plot.margin = unit(c(0,2,0,0), "lines")) #top, right, bottom, left
 
 filled_bar_plot
+
+filled_bar_plot2 <- with_groups %>%
+  ggplot(aes(y = fct_rev(fct_relevel(group, "all models unanimous", "BERT and ESM1b", "only CNN", "only BERT", "CNN and BERT", "CNN and ESM1b", "only ESM1b", "unique")), x = n, fill = fct_rev(prediction))) +
+  geom_col(position = "fill",
+           alpha = 0.6) +
+  scale_y_discrete(
+    name = "",
+    expand = c(0,0)
+  ) +
+  scale_x_continuous(
+    name = "Proportion within category",
+    breaks = seq(from = 0.0, to = 1.0, by = 0.2),
+    expand = expansion(add = c(0, 0))
+  ) +
+  scale_fill_manual(values = c("#839ea8", "#91595c"), breaks=c('correct predictions', 'mispredictions')) +
+  labs(fill = "") +
+  theme_cowplot(10) +
+  theme(
+    panel.grid.major.x = element_line(colour="gray29", size=0.2, linetype = "dashed"),
+    panel.grid.minor.x = element_line(colour="gray29", size=0.2, linetype = "dashed"),
+    legend.position = "right",
+    axis.text = element_text(
+      color = "black",
+      size = 10)) 
+
+filled_bar_plot2
+
+cor_and_mis_plots <- plot_grid(all_bar_plot, filled_bar_plot2, ncol = 2, nrow = 1, labels = c('a', 'b'), rel_widths = c(0.85, 1))
+
+cor_and_mis_plots
+
+ggsave(filename = "./research/choices_barplot_double2.png", plot = cor_and_mis_plots, width = 10, height = 5)
+
 
 
 
