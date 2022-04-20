@@ -14,10 +14,13 @@ with open(output_path, "w") as fasta_all_file:
             seq = lines[0]
             gene = file[0:4].lower()
             chain = file[5]
+            fasta_all_file.write(">" + gene + "\n")
+            fasta_all_file.write(seq + "\n")
+
+'''
             if chain == "1":
-                fasta_all_file.write(">" + gene + "\n")
-                fasta_all_file.write(seq + "\n")
             else:
                 print(file)
+'''
 
 

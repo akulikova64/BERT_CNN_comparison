@@ -1,0 +1,36 @@
+import os
+import csv
+import sys
+
+
+
+def get_RSA_score(aa, abs_sol_acces):
+
+    max_ASA_values ={'A':129, 'R':274, 'N':195, 'D':193, 'C':167, 'E':223, 'Q':225, 'G':104, 'H':224, 'I':197, 'L':201, 'K':236, 'M':224, 'F':240, 'P':159, 'S':155, 'T':172, 'W':285, 'Y':263, 'V':174}
+
+    rel_sol_access = abs_sol_acces/max_ASA_values[aa]
+
+    return rel_sol_access
+
+
+#-------------------------------- main ----------------------------------
+
+input_path = "../../output/SASA_scores.csv"
+output_path = "../../output/corrected_RSA_scores.csv"
+
+
+with open(output_path, "w") as CSV_file:
+  writer = csv.writer(CSV_file)
+  writer.writerow(['gene', 'position', 'aa', 'RSA'])
+
+  with open(input_path, newline='') as csvfile:
+    csv_reader = csv.reader(csvfile, delimiter=',')
+    for row in csv_reader:
+        gene = row[0]
+        position = row[1]
+        aa = row[2]
+        abs_sol_acces = row[3]
+        rel_sol_access = get_RSA_score(aa, abs_sol_acces)
+        writer.writerow([gene, position, aa, rel_sol_access])
+
+print("Finished calcualting corrected RSA scores!")

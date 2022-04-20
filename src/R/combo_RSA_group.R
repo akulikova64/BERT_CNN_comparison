@@ -10,10 +10,11 @@ library(ggridges)
 combo_data <- read.csv(file = "./data/transfer_learning_net/predictions__model_combo3_run_1.csv", header=TRUE, sep=",")
 
 #loading in RSA data:
-sa_data <- read.csv(file = "./output/SASA_scores.csv", header=TRUE, sep=",")
+sa_data <- read.csv(file = "./output/corrected_RSA_scores.csv", header=TRUE, sep=",")
+sa_data_old <- read.csv(file = "./output/SASA_scores.csv", header=TRUE, sep=",")
 
 sa_data2 <- sa_data %>%
-  select(c(gene, position, SASA_rel_total))
+  select(c(gene, position, RSA))
 
 #categories:
 # all three nets unanimous
@@ -69,14 +70,17 @@ with_sa$group <- as.factor(with_sa$group)
 fills <- c("#d95a4c", "#e8d146", "#88cfc8", "#e0801f", "#498545", "#8e4e94", "#b3d638", "#0ca0c9")
 
 ridgeline_plot <- with_sa %>%
-  ggplot(aes(y = fct_rev(fct_reorder(group, SASA_rel_total)), x = SASA_rel_total, fill = group)) +
-  geom_density_ridges(alpha = 0.8) +
+  ggplot(aes(y = fct_rev(fct_reorder(group, RSA)), x = RSA, fill = group)) +
+  geom_density_ridges(
+    alpha = 0.8,
+    rel_min_height = 0.005
+    ) +
   scale_fill_manual(
     values = fills
   ) +
   scale_x_continuous(
     name = "RSA",
-    limits = c(0.0, 1.0),
+    limits = c(0.0, 1.1),
     breaks = seq(0.0, 1.0, by = 0.2),
     expand = c(0, 0)) + 
   scale_y_discrete(
