@@ -1,0 +1,24 @@
+import pandas as pd
+import sys
+import os
+
+# cut CNN predictions to include only the first chain
+
+
+output_path = "../../data/CNN_data_4122/"
+input_path = "../../data/CNN_data_4122_all_chains/csv/"
+
+# loading in old cnn data
+nn_df_List = os.listdir(input_path)
+
+for nn_df_file in nn_df_List:
+    nn_df = pd.read_csv(input_path + nn_df_file)
+
+    # getting name of first chain in file.
+    row_1 = nn_df.iloc[0]
+    chain = row_1[3]
+
+    # keeping only first chain and delefing the reset of the df:
+    nn_df_new = nn_df.loc[nn_df['chain_id'] == chain]
+
+    nn_df_new.to_csv(output_path + nn_df_file)

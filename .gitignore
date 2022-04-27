@@ -5,6 +5,7 @@
 data/transfer_learning_net
 data/protBERT_data_4122
 data/CNN_data_4122
+data/CNN_data_4122_all_chains
 data/ESM1b_data_4122
 data/seqs_4122
 data/PSICOV_ESM1v
@@ -12,3 +13,4 @@ data/PSICOV_EMS1v
 output/PSICOV_CNN_output_new
 data/PSICOV_ESM1v
 output/aligned_CNN_PSICOV
+output/aligned_CNN_4122

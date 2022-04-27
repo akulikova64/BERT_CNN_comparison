@@ -2,25 +2,25 @@ import sys
 import os
 
 
-input_path = "../../data/seqs_4122"
+input_path = "../../data/seqs_4122/seqs_all_chains"
 output_path = "../../data/seqs_4122_all.fasta"
 
 file_list = os.listdir(input_path)
 
+
 with open(output_path, "w") as fasta_all_file:
+
     for file in file_list:
         with open(input_path + "/" + file, "r") as seq_file:
+
             lines = seq_file.readlines()
             seq = lines[0]
             gene = file[0:4].lower()
             chain = file[5]
-            fasta_all_file.write(">" + gene + "\n")
+            file_name = file[0:-4]
+            fasta_all_file.write(">" + file_name + "\n")
             fasta_all_file.write(seq + "\n")
 
-'''
-            if chain == "1":
-            else:
-                print(file)
-'''
+print("Done making fasta.")
 
 

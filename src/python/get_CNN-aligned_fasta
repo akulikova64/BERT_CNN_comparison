@@ -1,0 +1,97 @@
+import pandas as pd
+import gemmi
+from typing import Tuple
+from typing import List
+from typing import Dict
+from numpy import isnan
+from Bio import SeqIO
+import sys
+import os
+
+# this script saves the fasta sequences that align best with the CNN results:
+
+# function that aligns the fasta sequence to the structure sequence:
+def fetch_seq_from_nn_pred(nn_pred: pd.DataFrame, chain_id: str) -> Tuple[List[int], str]:
+
+    chain_rows = (
+        nn_pred[nn_pred["chain_id"] == chain_id]
+        .sort_values(by="pos", ascending=True)
+        .drop_duplicates(["pos", "wtAA"])
+    )
+    seq_nums, seq = list(zip(*chain_rows[["pos", "wtAA"]].values))
+    return seq_nums, gemmi.one_letter_code(seq)
+
+def get_alignment_score(fp_seq: str, nn_pred: pd.DataFrame, chain_id: str) -> Dict[int, int]:
+    """
+    Returns alignment score
+    """
+
+    pdb_seq_ids, pdb_seq = fetch_seq_from_nn_pred(nn_pred, chain_id)
+    alignment = gemmi.align_string_sequences(list(fp_seq), list(pdb_seq), [])
+
+    return alignment.score
+
+
+#------------------------------ main ------------------------------------------
+
+input_path_fasta =  "../../data/seqs_4122_all.fasta"
+input_path_cnn = "../../data/CNN_data_4122/" #CNN results containing first chain of every protein only
+output_path = "../../data/filtered_4122_seqs.fasta"
+
+# loading in old fasta
+nn_df_List = os.listdir(input_path_cnn)
+fasta_seqs = list(SeqIO.parse(input_path_fasta, "fasta"))
+
+with open(output_path, "w") as fasta_filtered_file:
+
+    for nn_df_file in nn_df_List:
+
+        gene_pdb = nn_df_file[0:4].lower()
+        nn_df = pd.read_csv(input_path_cnn + nn_df_file)
+        row_1 = nn_df.iloc[0]
+        chain = row_1[4]
+
+        # the following three lists are parallel:
+        all_chain_names = []
+        scores = []
+        sequences = []
+
+        for rec in fasta_seqs:
+            fasta_sequence = str(rec.seq)
+            gene_fasta_long = str(rec.name)
+            gene_fasta = gene_fasta_long[0:4].lower()
+
+            # check if we are alignming the same protein:
+            #if gene_pdb == "1bsg" and gene_pdb == gene_fasta:
+
+            if gene_pdb == gene_fasta:
+                # getting alignment score
+                alignment_score = get_alignment_score(fasta_sequence, nn_df, chain)
+
+                # storing the alignment scores for each chain along with the name and sequence
+                all_chain_names.append(gene_fasta_long)
+                scores.append(alignment_score)
+                sequences.append(fasta_sequence)
+       
+        # now finding winning sequences (best aligned) in the three lists above.
+        if len(scores) == 0:
+            print(gene_pdb)
+        else:
+            max_score = max(scores) 
+            max_index = scores.index(max_score) # gets index of first occuring maximum score (if there are ties)
+            winner_sequence = sequences[max_index]
+            winner_name = all_chain_names[max_index]
+
+            # record winning sequence in alignment fasta:
+            fasta_filtered_file.write(">" + winner_name + "\n")
+            fasta_filtered_file.write(winner_sequence + "\n")
+
+
+print("Done!")
+
+
+            
+
+
+  
+

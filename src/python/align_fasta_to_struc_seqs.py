@@ -61,64 +61,53 @@ def map_fp_seqnums_to_pdb_seqnums(fp_seq: str, nn_pred: pd.DataFrame, chain_id: 
 
 #---------------------------- main -----------------------------------------------
 
-input_path_1 = "../../output/PSICOV_CNN_output_new/"
-input_path_2 = "../../data/PSICOV_seqs.fasta"
-output_path = "../../output/aligned_CNN_4122"
+input_path_1 = "../../data/CNN_data_4122/"
+input_path_2 = "../../data/filtered_4122_seqs.fasta"
+output_path = "../../output/aligned_CNN_4122/"
 
 nn_df_List = os.listdir(input_path_1)
 fasta_seqs = list(SeqIO.parse(input_path_2, "fasta"))
+exceptions = []
 
 for nn_df_file in nn_df_List:
 
     gene_pdb = nn_df_file[0:4]
-    nn_df = pd.read_csv("../../output/PSICOV_CNN_output_new/" + nn_df_file)
+    nn_df = pd.read_csv(input_path_1 + nn_df_file)
+    chain = nn_df['chain_id']
 
     for rec in fasta_seqs:
         fasta_sequence = str(rec.seq)
-        gene_fasta = str(rec.name)
+        gene_fasta = str(rec.name)[0:4]
 
         # check if we are alignming the same protein:
-        #if gene_pdb == "1bsg" and gene_pdb == gene_fasta:
         if gene_pdb == gene_fasta:
-            #print(gene_pdb)
-
-            #print(len(nn_df))
-            #print(len(fasta_sequence))
-        
+         
             # the key is the residue position from the fasta sequence
             # the value is the residue position from the nn prediction csv (pdb/cif structure)
-            alignment_dict = map_fp_seqnums_to_pdb_seqnums(fasta_sequence, nn_df, "A")
-            #print(alignment_dict)
-
-            '''
-            old = 0
-            for number in list(alignment_dict.values()):
-                if number == old:
-                    print(number)
-                else:
-                    old = number
-            '''
+            alignment_dict = map_fp_seqnums_to_pdb_seqnums(fasta_sequence, nn_df, chain)
 
             values_list = list(alignment_dict.values())
             keys_list = list(alignment_dict.keys())
-            #print(len(values_list))
-            #print(len(keys_list))
 
             try:  
                 # selecting rows based on condition (keeping only chain A and keeping only rows that align with the sequences)
-                nn_df_chainA = nn_df.loc[nn_df['chain_id'] == 'A']
-                new_nn_df = nn_df_chainA.loc[nn_df_chainA['pos'].isin(values_list)]
-                #print(new_nn_df)
-                #print(len(new_nn_df)) 
+                #nn_df_chainA = nn_df.loc[nn_df['chain_id'] == 'A']
+                #new_nn_df = nn_df_chainA.loc[nn_df_chainA['pos'].isin(values_list)]
+
+                # only keeping rows that match the sequence positions
+                new_nn_df = nn_df.loc[nn_df['pos'].isin(values_list)]
+                
 
                 # adding a column to pandas dataframe:
                 new_nn_df['position'] = keys_list
 
-                new_nn_df.to_csv('../../output/aligned_CNN_PSICOV/' + gene_pdb + '.csv')
+                new_nn_df.to_csv(output_path + gene_pdb + '.csv')
+                print("Saved new csv file for protein", gene_pdb)
             except:
-                print("An exception occurred on protein", gene_pdb)
-
-
+                exceptions.append(gene_pdb)
+                
+print("An exception occurred in the following proteins:\n", exceptions)
+print()           
 print("Finished aligning all proteins!")
 
 
