@@ -7,9 +7,8 @@ analysis/figures/ - contains all plots and figures
 src/ - R and python scripts for data processing
 
 model/ - contains the fully trained combined model
-
-
 <br />
+
 
 ### Scripts for training and running the combined model:
 
@@ -18,9 +17,8 @@ model/ - contains the fully trained combined model
 2) transfer_learning_network.py - neural network that trains the combined model
 
 3) get_predictions_transf_learning.py - use this script to upload trained model and generate predicitons. 
-
-
 <br />
+
 
 ### Scripts for data preparation:
 
