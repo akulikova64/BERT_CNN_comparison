@@ -2,9 +2,13 @@
 
 output/ - processed data
 
+data/ - unprocessed data
+
 analysis/figures/ - contains all plots and figures
 
 src/ - R and python scripts for data processing
+
+training_data.txt - dataset used in the training of the combined model (not all proteins in this dataset were used in final training due to technical issues during CNN prediction generation or alignment of structure to sequence.)
 
 model/ - contains the fully trained combined model
 <br />
@@ -20,7 +24,11 @@ model/ - contains the fully trained combined model
 
 ### Scripts for data preparation:
 
-1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (important when concatenating the different neural network outputs)
+1) get_first_chain_of_CNN_predictions.py - only the first chain of the CNN predictions was used in the case of multimeric proteins. 
+
+2) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (important when concatenating the different neural network outputs)
+
+3) cnn_output_to_csv.py - makes sure the CNN output is tidy and matches output from transformer models
 
 ---
 
