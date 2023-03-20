@@ -1,0 +1,2 @@
+
+Model was trained for 70 epochs on the final dataset over 3000 proteins. 
