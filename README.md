@@ -10,7 +10,7 @@ model/ - contains the fully trained combined model
 
 
 <br />
-<br />
+
 ### Scripts for training and running the combined model:
 
 1) get_train_val_test_data.py - compiles the training/test and validation data (concatenates esm1-b, protBERT and CNN outputs)
@@ -21,7 +21,7 @@ model/ - contains the fully trained combined model
 
 
 <br />
-<br />
+
 ### Scripts for data preparation:
 
 1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (this is important when concatenating the different neural network outputs)
