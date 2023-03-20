@@ -1,2 +1,11 @@
-
 Model was trained for 70 epochs on the final dataset over 3000 proteins. 
+
+Use this model along with cnn and transformer predictions as input to get_predictions_transf_learning.py.
+
+In the get_predictions_transf_learning.py script, change the following to your own data.
+
+cnn_pred = "../../output/aligned_CNN_PSICOV_Raghavs_model/"  
+bert_pred = "../../output/PSICOV_BERT_predictions.csv"
+esm_pred = "../../output/PSICOV_ESM1b_predictions.csv"
+
+Note: CNN predictions need to be aligned to the sequences and formatted to look exactly like the transfromer esm1-b and protBERT predictions output (from Berteome library). When aligning the CNN output to the sequences, positions lost in the crystal structure and omited from CNN output are dropped from the training/analysis. 
