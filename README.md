@@ -1,5 +1,5 @@
 # Sequence and structure based deep learning models represent different aspects of protein biochemistry
-## This repository contains the trained model, code, analysis and processed/unprocessed data.
+## This repository contains the trained model, code, analysis and additional data.
 
 output/ - processed data
 
