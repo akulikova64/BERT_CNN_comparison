@@ -1,4 +1,5 @@
-## Sequence and structure based deep learning models represent different aspects of protein biochemistry
+# Sequence and structure based deep learning models represent different aspects of protein biochemistry
+## This repository contains trained CNN models, code, analysis and processed data.
 
 output/ - processed data
 
@@ -10,7 +11,7 @@ src/ - R and python scripts for data processing
 
 training_data.txt - dataset used in the training of the combined model (not all proteins in this dataset were used in final training due to technical issues during CNN prediction generation or alignment of structure to sequence.)
 
-model/ - contains the fully trained combined model
+model/ - contains the fully trained combined model (model__3306_70_epochs_run_1.h5)
 <br />
 <br />
 
