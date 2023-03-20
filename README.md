@@ -9,9 +9,10 @@ analysis/figures/ - contains all plots and figures
 
 src/ - R and python scripts for data processing
 
+model/ - contains the fully trained combined model (model__3306_70_epochs_run_1.h5)
+
 training_data.txt - dataset used in the training of the combined model (not all proteins in this dataset were used in final training due to technical issues during CNN prediction generation or alignment of structure to sequence.)
 
-model/ - contains the fully trained combined model (model__3306_70_epochs_run_1.h5)
 <br />
 <br />
 
