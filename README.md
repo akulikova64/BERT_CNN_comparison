@@ -21,7 +21,7 @@ model/ - contains the fully trained combined model
 
 ### Scripts for data preparation:
 
-1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (this will be important when concatenating the different neural network outputs)
+1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (this is important when concatenating the different neural network outputs)
 
 
 
