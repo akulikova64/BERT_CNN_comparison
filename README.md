@@ -24,6 +24,7 @@ model/ - contains the fully trained combined model
 1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (this is important when concatenating the different neural network outputs)
 
 
+<br />
 
 CC BY-NC 4.0 This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (see https://creativecommons.org/licenses/by-nc/4.0/legalcode).
 
