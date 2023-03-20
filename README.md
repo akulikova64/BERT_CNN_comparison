@@ -17,13 +17,10 @@ model/ - contains the fully trained combined model
 2) transfer_learning_network.py - neural network that trains the combined model
 
 3) get_predictions_transf_learning.py - use this script to upload trained model and generate predicitons. 
-<br />
 
 ### Scripts for data preparation:
 
 1) align_fasta_to_struc_seqs.py - checks that the sequences are aligned to the structures via "position" (this is important when concatenating the different neural network outputs)
-
-<br />
 
 ---
 
