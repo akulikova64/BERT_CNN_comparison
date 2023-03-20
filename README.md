@@ -28,5 +28,3 @@ CC BY-NC 4.0 This work is licensed under a Creative Commons Attribution-NonComme
 
 Using this work commercially may require a license to intellectual property owned by the Board of Regents of the University of Texas System. Contact licensing@otc.utexas.edu for inquiries.
 
----
-
