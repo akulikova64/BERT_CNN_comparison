@@ -1,6 +1,6 @@
-# BERT_CNN_comparison
+## Sequence and structure based deep learning models represent different aspects of protein biochemistry
 
-### Scripts for training and running the combined model:
+#### Scripts for training and running the combined model:
 
 get_train_val_test_data.py - compiles the training/test and validation data (concatenates esm1-b, protBERT and CNN outputs)
 
