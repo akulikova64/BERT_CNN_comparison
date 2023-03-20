@@ -30,7 +30,7 @@ training_data.txt - dataset used in the training of the combined model (not all 
 
 2) transfer_learning_network.py - neural network that trains the combined model
 
-3) get_predictions_transf_learning.py - use this script to upload trained model and generate predicitons
+3) get_predictions_transf_learning.py - use this script to upload trained model and generate predictions
 
 ---
 
